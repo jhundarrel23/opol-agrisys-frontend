@@ -18,30 +18,32 @@ export default function HomePage() {
 
       <Container maxWidth="xl" sx={{ py: 0 }}>
         <Hero />
-        <LoginOptions />
+        <Box id="login-options" sx={{ py: { xs: 6, md: 8 } }}>
+          <LoginOptions />
+        </Box>
 
         {/* ✅ Add IDs directly on wrapper divs */}
-        <Box id="program-overview" sx={{ py: 10 }}>
+        <Box id="program-overview" sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: { xs: 72, md: 88 } }}>
           <ProgramOverview />
         </Box>
 
-        <Box id="moa-information" sx={{ py: 10 }}>
+        <Box id="moa-information" sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: { xs: 72, md: 88 }, bgcolor: "background.paper" }}>
           <MOAInformation />
         </Box>
 
-        <Box id="beneficiary-directory" sx={{ py: 10 }}>
+        <Box id="beneficiary-directory" sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: { xs: 72, md: 88 } }}>
           <BeneficiaryDirectory />
         </Box>
 
-        <Box id="news-updates" sx={{ py: 10 }}>
+        <Box id="news-updates" sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: { xs: 72, md: 88 }, bgcolor: "background.paper" }}>
           <NewsUpdates />
         </Box>
 
-        <Box id="photo-gallery" sx={{ py: 10 }}>
+        <Box id="photo-gallery" sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: { xs: 72, md: 88 } }}>
           <PhotoGallery />
         </Box>
 
-        <Box id="contact-information" sx={{ py: 10 }}>
+        <Box id="contact-information" sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: { xs: 72, md: 88 }, bgcolor: "background.paper" }}>
           <ContactInformation />
         </Box>
       </Container>
