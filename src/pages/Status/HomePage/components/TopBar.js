@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import "./TopBar.css";
 
 const sections = [
   { id: "program-overview", label: "Program Overview" },
@@ -9,10 +10,33 @@ const sections = [
   { id: "contact-information", label: "Contact Information" }
 ];
 
+// Agro Connect Logo Component
+const AgroConnectLogo = ({ isScrolled }) => (
+  <div className="logo-container">
+    <div className="logo-icon-wrapper">
+      <svg 
+        className="logo-svg" 
+        fill="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path d="M12 2L13.09 8.26L15 7L14.08 9.74L16 9L15.92 12H8.08L8 9L9.92 9.74L9 7L10.91 8.26L12 2Z"/>
+        <path d="M12 14C10.9 14 10 14.9 10 16V22H14V16C14 14.9 13.1 14 12 14Z"/>
+        <path d="M8 16C6.9 16 6 16.9 6 18V22H10V18C10 16.9 9.1 16 8 16Z"/>
+        <path d="M16 16C14.9 16 14 16.9 14 18V22H18V18C18 16.9 17.1 16 16 16Z"/>
+      </svg>
+    </div>
+    <div className="logo-text-wrapper">
+      <span className="logo-main-text">Agro Connect</span>
+      <span className="logo-sub-text">Agricultural Systems</span>
+    </div>
+  </div>
+);
+
 export default function TopBar() {
   const [activeSectionId, setActiveSectionId] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [headerOffset, setHeaderOffset] = useState(80);
+  const [isScrolled, setIsScrolled] = useState(false);
   const navRef = useRef(null);
 
   useEffect(() => {
@@ -28,6 +52,8 @@ export default function TopBar() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + headerOffset + 1;
+      setIsScrolled(window.scrollY > 10);
+      
       let currentId = null;
       sections.forEach(({ id }) => {
         const el = document.getElementById(id);
@@ -53,53 +79,52 @@ export default function TopBar() {
   };
 
   return (
-    <nav ref={navRef} className="sticky top-0 z-50 bg-gradient-to-r from-blue-700/95 to-blue-500/95 backdrop-blur shadow-lg">
-      <div className="container mx-auto flex items-center justify-between px-6 py-3">
+    <nav 
+      ref={navRef} 
+      className={`topbar ${isScrolled ? 'scrolled' : ''}`}
+    >
+      <div className="topbar-container">
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="text-white text-lg font-bold tracking-wide hover:text-yellow-200 transition-colors"
+          className="logo-button"
         >
-          OPOL AGRISYS
+          <AgroConnectLogo isScrolled={isScrolled} />
         </button>
 
-        <div className="hidden md:flex items-center gap-1">
+        <div className="desktop-nav">
           {sections.map((section) => (
             <button
               key={section.id}
               type="button"
               onClick={() => scrollToSection(section.id)}
               aria-current={activeSectionId === section.id ? "page" : undefined}
-              className={`px-3 py-2 rounded-lg font-medium transition-colors duration-300 ${
-                activeSectionId === section.id
-                  ? "bg-white text-blue-700 shadow"
-                  : "text-white hover:bg-white hover:text-blue-700"
-              }`}
+              className={`nav-item ${activeSectionId === section.id ? 'active' : ''}`}
             >
               {section.label}
             </button>
           ))}
         </div>
 
-        <div className="hidden md:flex">
+        <div className="desktop-actions">
           <button
             type="button"
             onClick={() => scrollToSection("login-options")}
-            className="ml-3 inline-flex items-center rounded-lg bg-white px-4 py-2 font-semibold text-blue-700 shadow hover:shadow-md transition"
+            className="login-button"
           >
             Login
           </button>
         </div>
 
-        <div className="md:hidden">
+        <div className="mobile-menu-wrapper">
           <button
             type="button"
             onClick={() => setIsMenuOpen((prev) => !prev)}
             aria-expanded={isMenuOpen}
             aria-controls="primary-menu"
-            className="inline-flex items-center rounded-md p-2 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50"
+            className="mobile-menu-toggle"
           >
-            <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+            <svg className="menu-icon" stroke="currentColor" fill="none" viewBox="0 0 24 24">
               {isMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -110,19 +135,15 @@ export default function TopBar() {
         </div>
       </div>
 
-      <div id="primary-menu" className={`md:hidden border-t border-white/10 ${isMenuOpen ? "block" : "hidden"}`}>
-        <div className="container mx-auto px-6 py-3 grid grid-cols-1 gap-2">
+      <div id="primary-menu" className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
+        <div className="mobile-menu-content">
           {sections.map((section) => (
             <button
               key={section.id}
               type="button"
               onClick={() => scrollToSection(section.id)}
               aria-current={activeSectionId === section.id ? "page" : undefined}
-              className={`w-full text-left px-3 py-2 rounded-lg font-medium transition-colors ${
-                activeSectionId === section.id
-                  ? "bg-white text-blue-700 shadow"
-                  : "text-white hover:bg-white hover:text-blue-700"
-              }`}
+              className={`mobile-nav-item ${activeSectionId === section.id ? 'active' : ''}`}
             >
               {section.label}
             </button>
@@ -130,7 +151,7 @@ export default function TopBar() {
           <button
             type="button"
             onClick={() => scrollToSection("login-options")}
-            className="mt-1 inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 font-semibold text-blue-700 shadow hover:shadow-md transition"
+            className="mobile-login-button"
           >
             Login
           </button>
