@@ -29,13 +29,12 @@ export default function TopBar() {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + headerOffset + 1;
       let currentId = null;
-      for (const { id } of sections) {
+      sections.forEach(({ id }) => {
         const el = document.getElementById(id);
-        if (!el) continue;
-        if (el.offsetTop <= scrollPosition) {
+        if (el && el.offsetTop <= scrollPosition) {
           currentId = id;
         }
-      }
+      });
       setActiveSectionId(currentId);
     };
 
