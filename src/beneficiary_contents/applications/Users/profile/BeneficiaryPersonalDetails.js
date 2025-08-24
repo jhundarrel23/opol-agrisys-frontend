@@ -95,12 +95,10 @@ const BeneficiaryPersonalDetails = () => {
     region: 'Region X (Northern Mindanao)',
     address: '',
     
-    // CONTACT INFORMATION
-    contact_number: '',
+    // CONTACT INFORMATION (Additional to User model)
     emergency_contact_number: '',
-    email: '',
     
-    // PERSONAL INFORMATION
+    // PERSONAL INFORMATION (Additional to User model)
     birth_date: '',
     place_of_birth: '',
     sex: '',
@@ -233,11 +231,6 @@ const BeneficiaryPersonalDetails = () => {
     if (!formData.barangay?.trim()) {
       newErrors.barangay = 'Barangay is required';
     }
-    if (!formData.contact_number?.trim()) {
-      newErrors.contact_number = 'Contact number is required';
-    } else if (!/^09[0-9]{9}$/.test(formData.contact_number)) {
-      newErrors.contact_number = 'Contact number must be in format: 09XXXXXXXXX';
-    }
     if (!formData.birth_date) {
       newErrors.birth_date = 'Birth date is required';
     }
@@ -262,11 +255,6 @@ const BeneficiaryPersonalDetails = () => {
     }
     if (!formData.is_household_head && !formData.household_head_name?.trim()) {
       newErrors.household_head_name = 'Household head name is required';
-    }
-
-    // Email validation
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
     }
 
     // Emergency contact validation
@@ -493,28 +481,30 @@ const BeneficiaryPersonalDetails = () => {
             <Divider sx={{ mb: 4 }} />
 
             <Grid container spacing={3}>
-              {/* Basic Information */}
+              {/* User Model Information (Read-only) */}
               <Grid item xs={12}>
                 <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 2 }}>
-                  Basic Information
-                  <Chip label="Required" color="error" size="small" sx={{ ml: 2 }} />
+                  Basic Information (From Registration)
+                  <Chip label="Read Only" color="info" size="small" sx={{ ml: 2 }} />
                 </Typography>
+                <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
+                  <Typography variant="body2">
+                    Your basic information (First Name, Last Name, Middle Name, Username, Email, Phone Number) 
+                    is managed in your user profile and cannot be changed here. 
+                    Contact an administrator if you need to update these details.
+                  </Typography>
+                </Alert>
               </Grid>
 
+              {/* Display User Info (Read-only) */}
               <Grid item xs={12} md={6}>
                 <StyledTextField
                   fullWidth
                   label="First Name"
-                  value={formData.first_name || ''}
-                  onChange={(e) => handleFieldChange('first_name', e.target.value)}
-                  disabled={!isEditing}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
+                  value={formData.first_name || 'From User Profile'}
+                  InputProps={{ readOnly: true }}
+                  sx={{ backgroundColor: 'action.hover' }}
+                  disabled={true}
                 />
               </Grid>
 
@@ -522,16 +512,32 @@ const BeneficiaryPersonalDetails = () => {
                 <StyledTextField
                   fullWidth
                   label="Last Name"
-                  value={formData.last_name || ''}
-                  onChange={(e) => handleFieldChange('last_name', e.target.value)}
-                  disabled={!isEditing}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
+                  value={formData.last_name || 'From User Profile'}
+                  InputProps={{ readOnly: true }}
+                  sx={{ backgroundColor: 'action.hover' }}
+                  disabled={true}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Email"
+                  value={formData.email || 'From User Profile'}
+                  InputProps={{ readOnly: true }}
+                  sx={{ backgroundColor: 'action.hover' }}
+                  disabled={true}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Phone Number"
+                  value={formData.phone_number || 'From User Profile'}
+                  InputProps={{ readOnly: true }}
+                  sx={{ backgroundColor: 'action.hover' }}
+                  disabled={true}
                 />
               </Grid>
 
@@ -618,31 +624,14 @@ const BeneficiaryPersonalDetails = () => {
                 </Grid>
               )}
 
-              {/* Contact Information */}
+              {/* Additional Contact Information */}
               <Grid item xs={12}>
                 <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
-                  Contact Information
+                  Additional Contact Information
                 </Typography>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Contact Number *"
-                  value={formData.contact_number || ''}
-                  onChange={(e) => handleFieldChange('contact_number', e.target.value)}
-                  error={!!errors.contact_number}
-                  helperText={errors.contact_number || 'Format: 09XXXXXXXXX'}
-                  placeholder="09XXXXXXXXX"
-                  disabled={!isEditing}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PhoneIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Your primary contact number and email are managed in your user profile.
+                </Typography>
               </Grid>
 
               <Grid item xs={12} md={6}>
@@ -665,26 +654,7 @@ const BeneficiaryPersonalDetails = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Email Address"
-                  type="email"
-                  value={formData.email || ''}
-                  onChange={(e) => handleFieldChange('email', e.target.value)}
-                  error={!!errors.email}
-                  helperText={errors.email}
-                  placeholder="your.email@example.com"
-                  disabled={!isEditing}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
+
 
               {/* Educational & Demographic */}
               <Grid item xs={12}>
@@ -991,22 +961,22 @@ const BeneficiaryPersonalDetails = () => {
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Data Sync:</strong> Your personal information here will automatically pre-fill your RSBSA application forms.
+                  <strong>Data Sync:</strong> Your RSBSA-specific information here will automatically pre-fill your RSBSA application forms.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Always Updated:</strong> Keep your information current to ensure smooth application processing.
+                  <strong>Always Updated:</strong> Keep your RSBSA information current to ensure smooth application processing.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Upsert Functionality:</strong> The system automatically creates or updates your profile based on existing data.
+                  <strong>Upsert Functionality:</strong> The system automatically creates or updates your RSBSA profile based on existing data.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Progress Tracking:</strong> Monitor your profile completion percentage to ensure all required information is provided.
+                  <strong>Separate from User Profile:</strong> Basic information (name, email, phone) is managed separately in your user registration.
                 </Typography>
               </Grid>
             </Grid>
