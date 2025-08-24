@@ -19,123 +19,51 @@ import {
   Alert,
   CircularProgress,
   Chip,
-  Paper,
-  FormControlLabel,
-  Switch,
-  FormHelperText,
-  InputAdornment,
-  IconButton,
-  Tooltip
+  Paper
 } from '@mui/material';
 import {
   Person as PersonIcon,
   Save as SaveIcon,
   Edit as EditIcon,
   CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  LocationOn as LocationIcon,
-  School as SchoolIcon,
-  Work as WorkIcon,
-  Home as HomeIcon
+  Warning as WarningIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import axios from 'axios';
 
-// Styled components for better UI
+// Import the API service for beneficiary details
+import { beneficiaryDetailsService } from '../../../../api/rsbsaService';
+
 const StyledCard = styled(Card)(({ theme }) => ({
   borderRadius: theme.spacing(2),
   boxShadow: theme.shadows[1],
-  transition: 'all 0.3s ease-in-out',
   '&:hover': {
-    boxShadow: theme.shadows[8],
-    transform: 'translateY(-2px)'
+    boxShadow: theme.shadows[4]
   }
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
-    borderRadius: theme.spacing(1.5),
-    transition: 'all 0.2s ease-in-out',
-    '&:hover': {
-      backgroundColor: theme.palette.action.hover
-    },
-    '&.Mui-focused': {
-      boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`
-    }
-  }
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.spacing(2),
-  textTransform: 'none',
-  fontWeight: 600,
-  padding: theme.spacing(1.5, 3),
-  transition: 'all 0.2s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-1px)',
-    boxShadow: theme.shadows[4]
+    borderRadius: theme.spacing(1.5)
   }
 }));
 
 const BeneficiaryPersonalDetails = () => {
   const [formData, setFormData] = useState({
-    // RSBSA INFORMATION
-    system_generated_rsbsa_number: '',
-    manual_rsbsa_number: '',
-    rsbsa_verification_status: 'not_verified',
-    rsbsa_verification_notes: '',
-    rsbsa_verified_at: null,
-    rsbsa_verified_by: null,
-    
-    // LOCATION INFORMATION
+    first_name: '',
+    last_name: '',
+    middle_name: '',
+    contact_number: '',
+    emergency_contact_number: '',
+    email: '',
+    birth_date: '',
+    civil_status: '',
+    highest_education: '',
+    is_pwd: false,
+    address: '',
     barangay: '',
     municipality: 'Opol',
     province: 'Misamis Oriental',
-    region: 'Region X (Northern Mindanao)',
-    
-    // CONTACT INFORMATION
-    contact_number: '',
-    emergency_contact_number: '',
-    
-    // PERSONAL INFORMATION
-    birth_date: '',
-    place_of_birth: '',
-    sex: '',
-    civil_status: '',
-    name_of_spouse: '',
-    
-    // EDUCATIONAL & DEMOGRAPHIC
-    highest_education: '',
-    religion: '',
-    is_pwd: false,
-    
-    // GOVERNMENT ID
-    has_government_id: 'no',
-    gov_id_type: '',
-    gov_id_number: '',
-    
-    // ASSOCIATION MEMBERSHIP
-    is_association_member: 'no',
-    association_name: '',
-    
-    // HOUSEHOLD INFORMATION
-    mothers_maiden_name: '',
-    is_household_head: false,
-    household_head_name: '',
-    
-    // VERIFICATION & TRACKING
-    profile_completion_status: '',
-    is_profile_verified: false,
-    verification_notes: '',
-    profile_verified_at: null,
-    profile_verified_by: null,
-    data_source: 'self_registration',
-    last_updated_by_beneficiary: null,
-    completion_tracking: []
+    region: 'Region X (Northern Mindanao)'
   });
 
   const [errors, setErrors] = useState({});
@@ -145,8 +73,6 @@ const BeneficiaryPersonalDetails = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [completionPercentage, setCompletionPercentage] = useState(0);
 
   // Mock data for dropdowns - in real app, fetch from API
   const barangayOptions = [
@@ -154,23 +80,13 @@ const BeneficiaryPersonalDetails = () => {
   ];
 
   const civilStatusOptions = [
-    'single', 'married', 'widowed', 'separated', 'divorced'
+    'Single', 'Married', 'Widowed', 'Divorced', 'Separated'
   ];
 
   const educationOptions = [
-    'None', 'Pre-school', 'Elementary', 'Junior High School', 'Senior High School', 'Vocational', 'College', 'Post Graduate'
-  ];
-
-  const sexOptions = [
-    'male', 'female'
-  ];
-
-  const governmentIdTypes = [
-    'Philippine Passport', 'Driver\'s License', 'SSS ID', 'GSIS ID', 'Voter\'s ID', 'Postal ID', 'TIN ID', 'PhilHealth ID', 'Other'
-  ];
-
-  const religions = [
-    'Roman Catholic', 'Protestant', 'Islam', 'Buddhism', 'Hinduism', 'Atheist', 'Agnostic', 'Other'
+    'No Formal Education', 'Elementary Level', 'Elementary Graduate', 
+    'High School Level', 'High School Graduate', 'College Level', 
+    'College Graduate', 'Post Graduate'
   ];
 
   // Load existing beneficiary data
@@ -185,24 +101,21 @@ const BeneficiaryPersonalDetails = () => {
       const storedUser = JSON.parse(localStorage.getItem('user')) || {};
       const userId = storedUser.id || '123'; // Placeholder - replace with actual user ID
 
-      const response = await axios.get(`/api/beneficiary-details/${userId}`);
+      const result = await beneficiaryDetailsService.getDetailsByUserId(userId);
       
-      if (response.data.success && response.data.data) {
+      if (result.success && result.data) {
         setFormData(prevData => ({
           ...prevData,
-          ...response.data.data
+          ...result.data
         }));
-        setCompletionPercentage(response.data.meta?.completion_percentage || 0);
-        console.log('✅ Loaded existing beneficiary data:', response.data.data);
+        console.log('✅ Loaded existing beneficiary data:', result.data);
       } else {
         console.log('ℹ️ No existing data found, using default form');
       }
     } catch (error) {
       console.error('❌ Error loading beneficiary data:', error);
-      if (error.response?.status !== 404) { // Don't show error for new users
-        setShowError(true);
-        setErrorMessage('Failed to load existing data. Please try again.');
-      }
+      setShowError(true);
+      setErrorMessage('Failed to load existing data. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -221,63 +134,25 @@ const BeneficiaryPersonalDetails = () => {
         [field]: null
       }));
     }
-
-    // Handle conditional fields
-    if (field === 'civil_status' && value !== 'married') {
-      setFormData(prev => ({ ...prev, name_of_spouse: '' }));
-    }
-    if (field === 'has_government_id' && value === 'no') {
-      setFormData(prev => ({ ...prev, gov_id_type: '', gov_id_number: '' }));
-    }
-    if (field === 'is_association_member' && value === 'no') {
-      setFormData(prev => ({ ...prev, association_name: '' }));
-    }
-    if (field === 'is_household_head' && value === true) {
-      setFormData(prev => ({ ...prev, household_head_name: '' }));
-    }
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    // Required fields validation
-    if (!formData.barangay?.trim()) {
-      newErrors.barangay = 'Barangay is required';
+    if (!formData.first_name?.trim()) {
+      newErrors.first_name = 'First name is required';
+    }
+    if (!formData.last_name?.trim()) {
+      newErrors.last_name = 'Last name is required';
     }
     if (!formData.contact_number?.trim()) {
       newErrors.contact_number = 'Contact number is required';
-    } else if (!/^09[0-9]{9}$/.test(formData.contact_number)) {
-      newErrors.contact_number = 'Contact number must be in format: 09XXXXXXXXX';
+    }
+    if (!formData.barangay?.trim()) {
+      newErrors.barangay = 'Barangay is required';
     }
     if (!formData.birth_date) {
       newErrors.birth_date = 'Birth date is required';
-    }
-    if (!formData.sex) {
-      newErrors.sex = 'Sex is required';
-    }
-
-    // Conditional validation
-    if (formData.civil_status === 'married' && !formData.name_of_spouse?.trim()) {
-      newErrors.name_of_spouse = 'Spouse name is required for married status';
-    }
-    if (formData.has_government_id === 'yes') {
-      if (!formData.gov_id_type?.trim()) {
-        newErrors.gov_id_type = 'Government ID type is required';
-      }
-      if (!formData.gov_id_number?.trim()) {
-        newErrors.gov_id_number = 'Government ID number is required';
-      }
-    }
-    if (formData.is_association_member === 'yes' && !formData.association_name?.trim()) {
-      newErrors.association_name = 'Association name is required';
-    }
-    if (!formData.is_household_head && !formData.household_head_name?.trim()) {
-      newErrors.household_head_name = 'Household head name is required';
-    }
-
-    // Emergency contact validation
-    if (formData.emergency_contact_number && !/^09[0-9]{9}$/.test(formData.emergency_contact_number)) {
-      newErrors.emergency_contact_number = 'Emergency contact must be in format: 09XXXXXXXXX';
     }
 
     setErrors(newErrors);
@@ -286,8 +161,6 @@ const BeneficiaryPersonalDetails = () => {
 
   const handleSave = async () => {
     if (!validateForm()) {
-      setShowError(true);
-      setErrorMessage('Please fix the validation errors before saving.');
       return;
     }
 
@@ -297,44 +170,28 @@ const BeneficiaryPersonalDetails = () => {
       const storedUser = JSON.parse(localStorage.getItem('user')) || {};
       const userId = storedUser.id || '123'; // Placeholder - replace with actual user ID
 
-      // Use upsert endpoint (store method handles both create and update)
-      const response = await axios.post('/api/beneficiary-details', {
+      const result = await beneficiaryDetailsService.createDetails({
         ...formData,
         user_id: userId
       });
 
-      if (response.data.success) {
+      if (result.success) {
         setShowSuccess(true);
         setIsEditing(false);
-        setCompletionPercentage(response.data.meta?.completion_percentage || 0);
-        console.log('✅ Personal details saved successfully:', response.data.data);
+        console.log('✅ Personal details saved successfully:', result.data);
         
-        // Hide success message after 4 seconds
-        setTimeout(() => setShowSuccess(false), 4000);
+        // Hide success message after 3 seconds
+        setTimeout(() => setShowSuccess(false), 3000);
       } else {
-        throw new Error(response.data.message || 'Failed to save personal details');
+        throw new Error(result.message || 'Failed to save personal details');
       }
     } catch (error) {
       console.error('❌ Error saving personal details:', error);
-      
-      let errorMsg = 'Failed to save personal details. Please try again.';
-      
-      if (error.response?.data?.errors) {
-        // Handle validation errors from backend
-        const backendErrors = error.response.data.errors;
-        setErrors(backendErrors);
-        errorMsg = 'Please fix the validation errors.';
-      } else if (error.response?.data?.message) {
-        errorMsg = error.response.data.message;
-      } else if (error.message) {
-        errorMsg = error.message;
-      }
-      
       setShowError(true);
-      setErrorMessage(errorMsg);
+      setErrorMessage(error.message || 'Failed to save personal details. Please try again.');
       
-      // Hide error message after 6 seconds
-      setTimeout(() => setShowError(false), 6000);
+      // Hide error message after 5 seconds
+      setTimeout(() => setShowError(false), 5000);
     } finally {
       setIsSaving(false);
     }
@@ -344,7 +201,6 @@ const BeneficiaryPersonalDetails = () => {
     setIsEditing(true);
     setShowSuccess(false);
     setShowError(false);
-    setErrors({});
   };
 
   const handleCancel = () => {
@@ -369,16 +225,16 @@ const BeneficiaryPersonalDetails = () => {
         <title>Personal Details - RSBSA Beneficiary</title>
         <meta 
           name="description" 
-          content="Manage your personal information for RSBSA registration and benefits" 
+          content="Manage your personal information for RSBSA registration and benefits"
         />
       </Helmet>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* Header with Progress */}
+        {/* Header */}
         <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2, backgroundColor: 'primary.main', color: 'white' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <PersonIcon sx={{ fontSize: 40, mr: 2 }} />
-            <Box sx={{ flex: 1 }}>
+            <Box>
               <Typography variant="h3" component="h1" fontWeight="bold">
                 Personal Details
               </Typography>
@@ -386,27 +242,6 @@ const BeneficiaryPersonalDetails = () => {
                 Manage your personal information for RSBSA registration
               </Typography>
             </Box>
-            <Box sx={{ textAlign: 'right' }}>
-              <Typography variant="h4" fontWeight="bold">
-                {completionPercentage}%
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                Profile Complete
-              </Typography>
-            </Box>
-          </Box>
-          
-          {/* Progress Bar */}
-          <Box sx={{ width: '100%', bgcolor: 'rgba(255,255,255,0.2)', borderRadius: 1, height: 8, mb: 2 }}>
-            <Box 
-              sx={{ 
-                width: `${completionPercentage}%`, 
-                bgcolor: 'success.main', 
-                height: 8, 
-                borderRadius: 1,
-                transition: 'width 0.5s ease-in-out'
-              }} 
-            />
           </Box>
           
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -421,11 +256,6 @@ const BeneficiaryPersonalDetails = () => {
               color="info" 
               variant="filled"
             />
-            <Chip 
-              label={`${completionPercentage}% Complete`}
-              color={completionPercentage >= 80 ? "success" : completionPercentage >= 50 ? "warning" : "error"}
-              variant="filled"
-            />
           </Box>
         </Paper>
 
@@ -437,7 +267,6 @@ const BeneficiaryPersonalDetails = () => {
             </Typography>
             <Typography variant="body2">
               Your information has been updated and will be used to pre-fill your RSBSA application forms.
-              Profile completion: {completionPercentage}%
             </Typography>
           </Alert>
         )}
@@ -456,24 +285,24 @@ const BeneficiaryPersonalDetails = () => {
         {/* Action Buttons */}
         <Box sx={{ display: 'flex', gap: 2, mb: 3, justifyContent: 'flex-end' }}>
           {!isEditing ? (
-            <StyledButton
+            <Button
               variant="contained"
               startIcon={<EditIcon />}
               onClick={handleEdit}
               size="large"
             >
               Edit Personal Details
-            </StyledButton>
+            </Button>
           ) : (
             <>
-              <StyledButton
+              <Button
                 variant="outlined"
                 onClick={handleCancel}
                 size="large"
               >
                 Cancel
-              </StyledButton>
-              <StyledButton
+              </Button>
+              <Button
                 variant="contained"
                 startIcon={<SaveIcon />}
                 onClick={handleSave}
@@ -481,7 +310,7 @@ const BeneficiaryPersonalDetails = () => {
                 size="large"
               >
                 {isSaving ? <CircularProgress size={20} /> : 'Save Changes'}
-              </StyledButton>
+              </Button>
             </>
           )}
         </Box>
@@ -499,83 +328,96 @@ const BeneficiaryPersonalDetails = () => {
             <Divider sx={{ mb: 4 }} />
 
             <Grid container spacing={3}>
-              {/* User Model Information (Read-only) */}
+              {/* Basic Information */}
               <Grid item xs={12}>
                 <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 2 }}>
-                  Basic Information (From Registration)
-                  <Chip label="Read Only" color="info" size="small" sx={{ ml: 2 }} />
+                  Basic Information
+                  <Chip label="Required" color="error" size="small" sx={{ ml: 2 }} />
                 </Typography>
-                <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
-                  <Typography variant="body2">
-                    Your basic information (First Name, Last Name, Middle Name, Username, Email, Phone Number) 
-                    is managed in your user profile and cannot be changed here. 
-                    Contact an administrator if you need to update these details.
-                  </Typography>
-                </Alert>
               </Grid>
 
-              {/* Display User Info (Read-only) */}
+              <Grid item xs={12} md={4}>
+                <StyledTextField
+                  fullWidth
+                  label="First Name *"
+                  value={formData.first_name}
+                  onChange={(e) => handleFieldChange('first_name', e.target.value)}
+                  error={!!errors.first_name}
+                  helperText={errors.first_name}
+                  disabled={!isEditing}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <StyledTextField
+                  fullWidth
+                  label="Last Name *"
+                  value={formData.last_name}
+                  onChange={(e) => handleFieldChange('last_name', e.target.value)}
+                  error={!!errors.last_name}
+                  helperText={errors.last_name}
+                  disabled={!isEditing}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <StyledTextField
+                  fullWidth
+                  label="Middle Name"
+                  value={formData.middle_name}
+                  onChange={(e) => handleFieldChange('middle_name', e.target.value)}
+                  disabled={!isEditing}
+                />
+              </Grid>
+
+              {/* Contact Information */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
+                  Contact Information
+                </Typography>
+              </Grid>
+
               <Grid item xs={12} md={6}>
                 <StyledTextField
                   fullWidth
-                  label="First Name"
-                  value={formData.first_name || 'From User Profile'}
-                  InputProps={{ readOnly: true }}
-                  sx={{ backgroundColor: 'action.hover' }}
-                  disabled
+                  label="Contact Number *"
+                  value={formData.contact_number}
+                  onChange={(e) => handleFieldChange('contact_number', e.target.value)}
+                  error={!!errors.contact_number}
+                  helperText={errors.contact_number || 'Format: 09XXXXXXXXX'}
+                  placeholder="09XXXXXXXXX"
+                  disabled={!isEditing}
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
                 <StyledTextField
                   fullWidth
-                  label="Last Name"
-                  value={formData.last_name || 'From User Profile'}
-                  InputProps={{ readOnly: true }}
-                  sx={{ backgroundColor: 'action.hover' }}
-                  disabled
+                  label="Emergency Contact Number"
+                  value={formData.emergency_contact_number}
+                  onChange={(e) => handleFieldChange('emergency_contact_number', e.target.value)}
+                  placeholder="09XXXXXXXXX"
+                  disabled={!isEditing}
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
                 <StyledTextField
                   fullWidth
-                  label="Email"
-                  value={formData.email || 'From User Profile'}
-                  InputProps={{ readOnly: true }}
-                  sx={{ backgroundColor: 'action.hover' }}
-                  disabled
+                  label="Email Address"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleFieldChange('email', e.target.value)}
+                  placeholder="your.email@example.com"
+                  disabled={!isEditing}
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Phone Number"
-                  value={formData.phone_number || 'From User Profile'}
-                  InputProps={{ readOnly: true }}
-                  sx={{ backgroundColor: 'action.hover' }}
-                  disabled
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth disabled={!isEditing}>
-                  <InputLabel>Sex *</InputLabel>
-                  <Select
-                    value={formData.sex || ''}
-                    onChange={(e) => handleFieldChange('sex', e.target.value)}
-                    label="Sex *"
-                    error={!!errors.sex}
-                  >
-                    {sexOptions.map((sex) => (
-                      <MenuItem key={sex} value={sex}>
-                        {sex.charAt(0).toUpperCase() + sex.slice(1)}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.sex && <FormHelperText error>{errors.sex}</FormHelperText>}
-                </FormControl>
+              {/* Personal Details */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
+                  Personal Details
+                </Typography>
               </Grid>
 
               <Grid item xs={12} md={6}>
@@ -589,24 +431,6 @@ const BeneficiaryPersonalDetails = () => {
                   helperText={errors.birth_date}
                   InputLabelProps={{ shrink: true }}
                   disabled={!isEditing}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Place of Birth"
-                  value={formData.place_of_birth || ''}
-                  onChange={(e) => handleFieldChange('place_of_birth', e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="City, Province"
                 />
               </Grid>
 
@@ -620,85 +444,11 @@ const BeneficiaryPersonalDetails = () => {
                   >
                     {civilStatusOptions.map((status) => (
                       <MenuItem key={status} value={status}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                        {status}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-              </Grid>
-
-              {formData.civil_status === 'married' && (
-                <Grid item xs={12} md={6}>
-                  <StyledTextField
-                    fullWidth
-                    label="Name of Spouse *"
-                    value={formData.name_of_spouse || ''}
-                    onChange={(e) => handleFieldChange('name_of_spouse', e.target.value)}
-                    error={!!errors.name_of_spouse}
-                    helperText={errors.name_of_spouse}
-                    disabled={!isEditing}
-                    placeholder="Full name of spouse"
-                  />
-                </Grid>
-              )}
-
-              {/* Contact Information */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
-                  Contact Information
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Your email is managed in your user profile, but you can update your contact number here.
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Contact Number *"
-                  value={formData.contact_number || ''}
-                  onChange={(e) => handleFieldChange('contact_number', e.target.value)}
-                  error={!!errors.contact_number}
-                  helperText={errors.contact_number || 'Format: 09XXXXXXXXX'}
-                  placeholder="09XXXXXXXXX"
-                  disabled={!isEditing}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PhoneIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Emergency Contact Number"
-                  value={formData.emergency_contact_number || ''}
-                  onChange={(e) => handleFieldChange('emergency_contact_number', e.target.value)}
-                  error={!!errors.emergency_contact_number}
-                  helperText={errors.emergency_contact_number}
-                  placeholder="09XXXXXXXXX"
-                  disabled={!isEditing}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PhoneIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-
-
-              {/* Educational & Demographic */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
-                  Educational & Demographic Information
-                </Typography>
               </Grid>
 
               <Grid item xs={12} md={6}>
@@ -718,205 +468,6 @@ const BeneficiaryPersonalDetails = () => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Religion"
-                  value={formData.religion || ''}
-                  onChange={(e) => handleFieldChange('religion', e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="Your religion"
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.is_pwd || false}
-                      onChange={(e) => handleFieldChange('is_pwd', e.target.checked)}
-                      disabled={!isEditing}
-                      color="primary"
-                    />
-                  }
-                  label="Person with Disability (PWD)"
-                />
-              </Grid>
-
-              {/* Government ID */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
-                  Government Identification
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth disabled={!isEditing}>
-                  <InputLabel>Do you have a Government ID?</InputLabel>
-                  <Select
-                    value={formData.has_government_id || 'no'}
-                    onChange={(e) => handleFieldChange('has_government_id', e.target.value)}
-                    label="Do you have a Government ID?"
-                  >
-                    <MenuItem value="yes">Yes</MenuItem>
-                    <MenuItem value="no">No</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {formData.has_government_id === 'yes' && (
-                <>
-                  <Grid item xs={12} md={6}>
-                    <FormControl fullWidth disabled={!isEditing}>
-                      <InputLabel>Government ID Type *</InputLabel>
-                      <Select
-                        value={formData.gov_id_type || ''}
-                        onChange={(e) => handleFieldChange('gov_id_type', e.target.value)}
-                        label="Government ID Type *"
-                        error={!!errors.gov_id_type}
-                      >
-                        {governmentIdTypes.map((type) => (
-                          <MenuItem key={type} value={type}>
-                            {type}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {errors.gov_id_type && <FormHelperText error>{errors.gov_id_type}</FormHelperText>}
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <StyledTextField
-                      fullWidth
-                      label="Government ID Number *"
-                      value={formData.gov_id_number || ''}
-                      onChange={(e) => handleFieldChange('gov_id_number', e.target.value)}
-                      error={!!errors.gov_id_number}
-                      helperText={errors.gov_id_number}
-                      disabled={!isEditing}
-                      placeholder="ID number"
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {/* Association Membership */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
-                  Association Membership
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth disabled={!isEditing}>
-                  <InputLabel>Are you a member of an association?</InputLabel>
-                  <Select
-                    value={formData.is_association_member || 'no'}
-                    onChange={(e) => handleFieldChange('is_association_member', e.target.value)}
-                    label="Are you a member of an association?"
-                  >
-                    <MenuItem value="yes">Yes</MenuItem>
-                    <MenuItem value="no">No</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {formData.is_association_member === 'yes' && (
-                <Grid item xs={12} md={6}>
-                  <StyledTextField
-                    fullWidth
-                    label="Association Name *"
-                    value={formData.association_name || ''}
-                    onChange={(e) => handleFieldChange('association_name', e.target.value)}
-                    error={!!errors.association_name}
-                    helperText={errors.association_name}
-                    disabled={!isEditing}
-                    placeholder="Name of your association"
-                  />
-                </Grid>
-              )}
-
-              {/* Household Information */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
-                  Household Information
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Mother's Maiden Name"
-                  value={formData.mothers_maiden_name || ''}
-                  onChange={(e) => handleFieldChange('mothers_maiden_name', e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="Mother's maiden name"
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.is_household_head || false}
-                      onChange={(e) => handleFieldChange('is_household_head', e.target.checked)}
-                      disabled={!isEditing}
-                      color="primary"
-                    />
-                  }
-                  label="Are you the household head?"
-                />
-              </Grid>
-
-              {!formData.is_household_head && (
-                <Grid item xs={12} md={6}>
-                  <StyledTextField
-                    fullWidth
-                    label="Household Head Name *"
-                    value={formData.household_head_name || ''}
-                    onChange={(e) => handleFieldChange('household_head_name', e.target.value)}
-                    error={!!errors.household_head_name}
-                    helperText={errors.household_head_name}
-                    disabled={!isEditing}
-                    placeholder="Name of household head"
-                  />
-                </Grid>
-              )}
-
-              {/* RSBSA Verification Information (Read-only) */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
-                  RSBSA Verification Status
-                  <Chip label="Read Only" color="info" size="small" sx={{ ml: 2 }} />
-                </Typography>
-                <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
-                  <Typography variant="body2">
-                    RSBSA verification status is managed by coordinators and administrators.
-                  </Typography>
-                </Alert>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="RSBSA Number"
-                  value={formData.system_generated_rsbsa_number || formData.manual_rsbsa_number || 'Not assigned yet'}
-                  InputProps={{ readOnly: true }}
-                  sx={{ backgroundColor: 'action.hover' }}
-                  disabled
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Verification Status"
-                  value={formData.rsbsa_verification_status ? formData.rsbsa_verification_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not verified'}
-                  InputProps={{ readOnly: true }}
-                  sx={{ backgroundColor: 'action.hover' }}
-                  disabled
-                />
-              </Grid>
-
               {/* Location Information */}
               <Grid item xs={12}>
                 <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
@@ -931,7 +482,6 @@ const BeneficiaryPersonalDetails = () => {
                     value={formData.barangay || ''}
                     onChange={(e) => handleFieldChange('barangay', e.target.value)}
                     label="Barangay *"
-                    error={!!errors.barangay}
                   >
                     {barangayOptions.map((barangay) => (
                       <MenuItem key={barangay} value={barangay}>
@@ -939,7 +489,6 @@ const BeneficiaryPersonalDetails = () => {
                       </MenuItem>
                     ))}
                   </Select>
-                  {errors.barangay && <FormHelperText error>{errors.barangay}</FormHelperText>}
                 </FormControl>
               </Grid>
 
@@ -949,16 +498,9 @@ const BeneficiaryPersonalDetails = () => {
                   label="Municipality"
                   value={formData.municipality}
                   onChange={(e) => handleFieldChange('municipality', e.target.value)}
+                  InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
                   disabled={!isEditing}
-                  InputProps={{
-                    readOnly: true,
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
                 />
               </Grid>
 
@@ -968,16 +510,9 @@ const BeneficiaryPersonalDetails = () => {
                   label="Province"
                   value={formData.province}
                   onChange={(e) => handleFieldChange('province', e.target.value)}
+                  InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
                   disabled={!isEditing}
-                  InputProps={{
-                    readOnly: true,
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
                 />
               </Grid>
 
@@ -987,16 +522,9 @@ const BeneficiaryPersonalDetails = () => {
                   label="Region"
                   value={formData.region}
                   onChange={(e) => handleFieldChange('region', e.target.value)}
+                  InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
                   disabled={!isEditing}
-                  InputProps={{
-                    readOnly: true,
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
                 />
               </Grid>
 
@@ -1006,17 +534,10 @@ const BeneficiaryPersonalDetails = () => {
                   label="Complete Address"
                   multiline
                   rows={3}
-                  value={formData.address || ''}
+                  value={formData.address}
                   onChange={(e) => handleFieldChange('address', e.target.value)}
                   placeholder="House/Unit Number, Street, Subdivision, etc."
                   disabled={!isEditing}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <HomeIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
                 />
               </Grid>
             </Grid>
@@ -1034,22 +555,12 @@ const BeneficiaryPersonalDetails = () => {
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Complete RSBSA Profile:</strong> This form contains all RSBSA-specific information including verification status and tracking.
+                  <strong>Data Sync:</strong> Your personal information here will automatically pre-fill your RSBSA application forms.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Data Sync:</strong> Your information here will automatically pre-fill your RSBSA application forms.
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>Upsert Functionality:</strong> The system automatically creates or updates your profile based on existing data.
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>Verification Tracking:</strong> Monitor your RSBSA verification status and profile completion progress.
+                  <strong>Always Updated:</strong> Keep your information current to ensure smooth application processing.
                 </Typography>
               </Grid>
             </Grid>
