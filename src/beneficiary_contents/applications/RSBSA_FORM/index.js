@@ -34,7 +34,7 @@ import {
 import { styled } from '@mui/material/styles';
 
 // Import the custom hook
-import { useRSBSAForm } from './useRSBSAForm';
+import { useRSBSAFormWithAPI } from './useRSBSAFormWithAPI';
 import RSBSAErrorBoundary from './ErrorBoundary';
 
 // Import form sections (we'll create these)
@@ -100,6 +100,10 @@ const ActionButtonContainer = styled(Box)(({ theme }) => ({
 }));
 
 const RSBSAForm = () => {
+  // TODO: Get actual user ID from authentication context
+  const userId = '123'; // Placeholder - replace with actual user ID from auth
+  
+  // Use the enhanced hook with API integration
   const {
     formData,
     errors,
@@ -116,11 +120,25 @@ const RSBSAForm = () => {
     prevStep,
     goToStep,
     submitForm,
+    saveDraft,
     resetForm,
-    formProgress,
-    isValid,
-    canSubmit
-  } = useRSBSAForm();
+    apiResponse,
+    hasPreFilledData
+  } = useRSBSAFormWithAPI(userId);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h5" gutterBottom>
+            Loading RSBSA Form...
+          </Typography>
+          <LinearProgress sx={{ mt: 2 }} />
+        </Box>
+      </Container>
+    );
+  }
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -169,6 +187,20 @@ const RSBSAForm = () => {
     } else {
       setShowError(true);
       setErrorMessage('Failed to submit form. Please try again.');
+      setShowSuccess(false);
+    }
+  };
+
+  // Handle draft saving
+  const handleSaveDraft = async () => {
+    const success = await saveDraft();
+    if (success) {
+      setShowSuccess(true);
+      setShowError(false);
+      setErrorMessage('Draft saved successfully!');
+    } else {
+      setShowError(true);
+      setErrorMessage('Failed to save draft. Please try again.');
       setShowSuccess(false);
     }
   };
@@ -418,7 +450,7 @@ const RSBSAForm = () => {
                     color="success"
                     endIcon={<SendIcon />}
                     onClick={handleSubmit}
-                    disabled={!canSubmit || isSubmitting}
+                    disabled={!validateForm() || isSubmitting}
                     sx={{ minWidth: 120 }}
                   >
                     {isSubmitting ? 'Submitting...' : 'Submit Application'}
