@@ -43,25 +43,15 @@ export const useRSBSAEnrollmentStatus = (enrollmentId, userId) => {
     }
   }, [enrollmentId]);
 
-  // Load enrollment status
+  // Load enrollment status (COORDINATOR/ADMIN ONLY - NOT FOR BENEFICIARIES)
   const loadEnrollmentStatus = useCallback(async () => {
     if (!enrollmentId) return;
 
-    setIsLoadingStatus(true);
-    setStatusError(null);
-
-    try {
-      const result = await rsbsaEnrollmentService.getEnrollmentStatus(enrollmentId);
-      if (result.success) {
-        setEnrollmentStatus(result.data);
-      } else {
-        setStatusError(result.error);
-      }
-    } catch (error) {
-      setStatusError('Failed to load enrollment status');
-    } finally {
-      setIsLoadingStatus(false);
-    }
+    // SECURITY: Beneficiaries should not be able to view detailed enrollment status
+    // This function is restricted to coordinators and administrators only
+    console.warn('⚠️ loadEnrollmentStatus: This function is restricted to coordinators/admins only');
+    setStatusError('Access denied: Status viewing is restricted to coordinators and administrators');
+    return;
   }, [enrollmentId]);
 
   // Submit enrollment for review

@@ -39,8 +39,7 @@ const UserSettings = Loader(lazy(() => import('src/content/applications/Users/se
 
 // 🌾 RSBSA Modules - Registry System for Basic Sectors in Agriculture
 const RSBSAForm = Loader(lazy(() => import('src/beneficiary_contents/applications/RSBSA_FORM'))); // Main RSBSA form component
-const RSBSAStatus = Loader(lazy(() => import('src/content/applications/RSBSA/Status'))); // RSBSA application status tracker
-const RSBSAList = Loader(lazy(() => import('src/content/applications/RSBSA/List'))); // List of RSBSA applications (optional)
+// NOTE: RSBSAStatus and RSBSAList removed - beneficiaries should not have access to application lists or status tracking
 
 // 🎨 UI Components
 const Buttons = Loader(lazy(() => import('src/content/pages/Components/Buttons')));
@@ -168,28 +167,12 @@ const routes = [
       },
       
       // 🌾 RSBSA Routes Section - Registry System for Basic Sectors in Agriculture
-      // This matches your sidebar navigation structure from the menu you showed me
+      // Beneficiaries can ONLY access the main application form - no status tracking or lists
       { 
         path: 'RSBSA_FORM', // 📝 Main RSBSA application form
         element: <RSBSAForm /> // This route matches "/beneficiary/RSBSA_FORM" from your sidebar
       },
-      {
-        path: 'rsbsa', // 📊 RSBSA management section with nested routes
-        children: [
-          { 
-            path: '', // Default redirect to status when accessing /beneficiary/rsbsa/
-            element: <Navigate to="status" replace /> 
-          },
-          { 
-            path: 'status', // 🔍 RSBSA application status tracker
-            element: <RSBSAStatus /> // This route matches "/beneficiary/rsbsa/status" from your sidebar
-          },
-          { 
-            path: 'list', // 📋 Optional: List all RSBSA applications for the beneficiary
-            element: <RSBSAList />
-          }
-        ]
-      },
+      // NOTE: Removed rsbsa/status and rsbsa/list routes - beneficiaries should not see application lists or status
 
       { path: '*', element: <Status404 /> } // Catch-all for unmatched beneficiary routes
     ]

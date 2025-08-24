@@ -333,6 +333,32 @@ const RSBSAForm = () => {
 - **Flexibility**: Users can still modify any field
 - **Efficiency**: Faster form completion
 
+## Security and Access Control
+
+The RSBSA system implements strict role-based access control:
+
+- **Beneficiaries**: 
+  - ✅ Can submit forms and save drafts
+  - ✅ Can view their own form data
+  - ❌ **CANNOT** view application lists or status tracking
+  - ❌ **CANNOT** see other beneficiaries' data
+  - ❌ **CANNOT** access enrollment management features
+
+- **Coordinators**: 
+  - ✅ Can review, approve, reject, and manage enrollments
+  - ✅ Can view application lists and status
+  - ✅ Can assign reviewers and manage the review process
+
+- **Administrators**: 
+  - ✅ Have full system access and can manage all aspects
+  - ✅ Can view all data and manage system settings
+
+## Important Security Notes
+
+⚠️ **Beneficiary Restrictions**: Beneficiaries are intentionally restricted from viewing application lists, status tracking, or any enrollment management features. This is a security requirement to protect privacy and prevent unauthorized access to other beneficiaries' information.
+
+🔒 **Data Isolation**: Each beneficiary can only access their own RSBSA application data. The system enforces this at both the frontend and backend levels.
+
 ## Error Handling
 
 All hooks include comprehensive error handling:
