@@ -39,6 +39,7 @@ const UserSettings = Loader(lazy(() => import('src/content/applications/Users/se
 
 // 🌾 RSBSA Modules - Registry System for Basic Sectors in Agriculture
 const RSBSAForm = Loader(lazy(() => import('src/beneficiary_contents/applications/RSBSA_FORM'))); // Main RSBSA form component
+const BeneficiaryPersonalDetails = Loader(lazy(() => import('src/beneficiary_contents/applications/Users/profile/BeneficiaryPersonalDetails'))); // Personal Details for RSBSA beneficiaries
 // NOTE: RSBSAStatus and RSBSAList removed - beneficiaries should not have access to application lists or status tracking
 
 // 🎨 UI Components
@@ -161,7 +162,7 @@ const routes = [
         path: 'profile',
         children: [
           { path: '', element: <Navigate to="details" replace /> },
-          { path: 'details', element: <UserProfile /> },
+          { path: 'details', element: <BeneficiaryPersonalDetails /> },
           { path: 'settings', element: <UserSettings /> }
         ] 
       },
