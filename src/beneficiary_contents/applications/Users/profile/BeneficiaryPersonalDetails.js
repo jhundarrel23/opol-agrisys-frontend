@@ -87,18 +87,21 @@ const BeneficiaryPersonalDetails = () => {
     system_generated_rsbsa_number: '',
     manual_rsbsa_number: '',
     rsbsa_verification_status: 'not_verified',
+    rsbsa_verification_notes: '',
+    rsbsa_verified_at: null,
+    rsbsa_verified_by: null,
     
     // LOCATION INFORMATION
     barangay: '',
     municipality: 'Opol',
     province: 'Misamis Oriental',
     region: 'Region X (Northern Mindanao)',
-    address: '',
     
-    // CONTACT INFORMATION (Additional to User model)
+    // CONTACT INFORMATION
+    contact_number: '',
     emergency_contact_number: '',
     
-    // PERSONAL INFORMATION (Additional to User model)
+    // PERSONAL INFORMATION
     birth_date: '',
     place_of_birth: '',
     sex: '',
@@ -122,7 +125,17 @@ const BeneficiaryPersonalDetails = () => {
     // HOUSEHOLD INFORMATION
     mothers_maiden_name: '',
     is_household_head: false,
-    household_head_name: ''
+    household_head_name: '',
+    
+    // VERIFICATION & TRACKING
+    profile_completion_status: '',
+    is_profile_verified: false,
+    verification_notes: '',
+    profile_verified_at: null,
+    profile_verified_by: null,
+    data_source: 'self_registration',
+    last_updated_by_beneficiary: null,
+    completion_tracking: []
   });
 
   const [errors, setErrors] = useState({});
@@ -230,6 +243,11 @@ const BeneficiaryPersonalDetails = () => {
     // Required fields validation
     if (!formData.barangay?.trim()) {
       newErrors.barangay = 'Barangay is required';
+    }
+    if (!formData.contact_number?.trim()) {
+      newErrors.contact_number = 'Contact number is required';
+    } else if (!/^09[0-9]{9}$/.test(formData.contact_number)) {
+      newErrors.contact_number = 'Contact number must be in format: 09XXXXXXXXX';
     }
     if (!formData.birth_date) {
       newErrors.birth_date = 'Birth date is required';
@@ -624,14 +642,34 @@ const BeneficiaryPersonalDetails = () => {
                 </Grid>
               )}
 
-              {/* Additional Contact Information */}
+              {/* Contact Information */}
               <Grid item xs={12}>
                 <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
-                  Additional Contact Information
+                  Contact Information
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Your primary contact number and email are managed in your user profile.
+                  Your email is managed in your user profile, but you can update your contact number here.
                 </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Contact Number *"
+                  value={formData.contact_number || ''}
+                  onChange={(e) => handleFieldChange('contact_number', e.target.value)}
+                  error={!!errors.contact_number}
+                  helperText={errors.contact_number || 'Format: 09XXXXXXXXX'}
+                  placeholder="09XXXXXXXXX"
+                  disabled={!isEditing}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               </Grid>
 
               <Grid item xs={12} md={6}>
@@ -844,6 +882,41 @@ const BeneficiaryPersonalDetails = () => {
                 </Grid>
               )}
 
+              {/* RSBSA Verification Information (Read-only) */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
+                  RSBSA Verification Status
+                  <Chip label="Read Only" color="info" size="small" sx={{ ml: 2 }} />
+                </Typography>
+                <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
+                  <Typography variant="body2">
+                    RSBSA verification status is managed by coordinators and administrators.
+                  </Typography>
+                </Alert>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="RSBSA Number"
+                  value={formData.system_generated_rsbsa_number || formData.manual_rsbsa_number || 'Not assigned yet'}
+                  InputProps={{ readOnly: true }}
+                  sx={{ backgroundColor: 'action.hover' }}
+                  disabled={true}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Verification Status"
+                  value={formData.rsbsa_verification_status ? formData.rsbsa_verification_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not verified'}
+                  InputProps={{ readOnly: true }}
+                  sx={{ backgroundColor: 'action.hover' }}
+                  disabled={true}
+                />
+              </Grid>
+
               {/* Location Information */}
               <Grid item xs={12}>
                 <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 2, mb: 2 }}>
@@ -961,22 +1034,22 @@ const BeneficiaryPersonalDetails = () => {
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Data Sync:</strong> Your RSBSA-specific information here will automatically pre-fill your RSBSA application forms.
+                  <strong>Complete RSBSA Profile:</strong> This form contains all RSBSA-specific information including verification status and tracking.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Always Updated:</strong> Keep your RSBSA information current to ensure smooth application processing.
+                  <strong>Data Sync:</strong> Your information here will automatically pre-fill your RSBSA application forms.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Upsert Functionality:</strong> The system automatically creates or updates your RSBSA profile based on existing data.
+                  <strong>Upsert Functionality:</strong> The system automatically creates or updates your profile based on existing data.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Separate from User Profile:</strong> Basic information (name, email, phone) is managed separately in your user registration.
+                  <strong>Verification Tracking:</strong> Monitor your RSBSA verification status and profile completion progress.
                 </Typography>
               </Grid>
             </Grid>
