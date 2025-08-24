@@ -101,6 +101,8 @@ const RSBSAForm = () => {
   // TODO: Get actual user ID from authentication context
   const userId = '123'; // Placeholder - replace with actual user ID from auth
   
+  console.log('🚀 RSBSA Form: Starting to render...');
+  
   // Use the enhanced hook with API integration
   const {
     formData,
@@ -123,6 +125,14 @@ const RSBSAForm = () => {
     apiResponse,
     hasPreFilledData
   } = useRSBSAFormWithAPI(userId);
+
+  console.log('🔍 RSBSA Form: Hook data loaded:', {
+    formData,
+    errors,
+    isLoading,
+    currentStep,
+    totalSteps
+  });
 
   // Loading state will be handled in the render method
 
@@ -363,31 +373,53 @@ const RSBSAForm = () => {
           </Alert>
         </Fade>
 
-        {/* Main Form Card */}
+                {/* Main Form Card */}
         {!isLoading && (
           <StyledCard>
-          <CardContent sx={{ p: 4 }}>
-            {/* Stepper */}
-            <StyledStepper activeStep={currentStep - 1} alternativeLabel>
-              {steps.map((step, index) => (
-                <Step key={step.label}>
-                  <StepLabel 
-                    icon={step.icon}
-                    onClick={() => goToStep(index + 1)}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <Typography variant="body2" fontWeight="medium">
-                      {step.label}
-                    </Typography>
-                  </StepLabel>
-                </Step>
-              ))}
-            </StyledStepper>
+            <CardContent sx={{ p: 4 }}>
+              {/* Stepper */}
+              <StyledStepper activeStep={currentStep - 1} alternativeLabel>
+                {steps.map((step, index) => (
+                  <Step key={step.label}>
+                    <StepLabel 
+                      icon={step.icon}
+                      onClick={() => goToStep(index + 1)}
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      <Typography variant="body2" fontWeight="medium">
+                        {step.label}
+                      </Typography>
+                    </StepLabel>
+                  </Step>
+                ))}
+              </StyledStepper>
 
-            {/* Form Content */}
-            <Box sx={{ mt: 4 }}>
-              {renderStepContent()}
-            </Box>
+              {/* Form Content */}
+              <Box sx={{ mt: 4 }}>
+                {/* Simple test content first */}
+                <Box sx={{ p: 3, bgcolor: 'grey.100', borderRadius: 2, mb: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    🧪 Form Debug Info
+                  </Typography>
+                  <Typography variant="body2">
+                    Current Step: {currentStep} / {totalSteps}
+                  </Typography>
+                  <Typography variant="body2">
+                    Loading: {isLoading ? 'Yes' : 'No'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Has Form Data: {formData ? 'Yes' : 'No'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Beneficiary Details: {formData?.beneficiaryDetails ? 'Yes' : 'No'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Errors: {Object.keys(errors || {}).length}
+                  </Typography>
+                </Box>
+                
+                {renderStepContent()}
+              </Box>
 
             {/* Action Buttons */}
             <ActionButtonContainer>
