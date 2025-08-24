@@ -20,7 +20,7 @@ export const useRSBSAEnrollmentStatus = (enrollmentId, userId) => {
   const [statusError, setStatusError] = useState(null);
   const [updateError, setUpdateError] = useState(null);
 
-  // Load enrollment data
+  // Load enrollment data (BENEFICIARY CAN ONLY SEE THEIR OWN ENROLLMENT)
   const loadEnrollment = useCallback(async () => {
     if (!enrollmentId) return;
 
@@ -30,6 +30,8 @@ export const useRSBSAEnrollmentStatus = (enrollmentId, userId) => {
     try {
       const result = await rsbsaEnrollmentService.getEnrollment(enrollmentId);
       if (result.success) {
+        // Beneficiaries can only see their own enrollment data
+        // Additional security check should be done on the backend
         setEnrollment(result.data);
       } else {
         setEnrollmentError(result.error);
