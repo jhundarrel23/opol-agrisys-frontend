@@ -1,5 +1,115 @@
 import axiosInstance from './axiosInstance';
 
+// Add validation schemas
+const VALIDATION_SCHEMAS = {
+  beneficiaryDetails: {
+    required: ['first_name', 'last_name', 'contact_number', 'barangay', 'municipality', 'province', 'region'],
+    string: ['first_name', 'last_name', 'middle_name', 'contact_number', 'barangay', 'municipality', 'province', 'region', 'address'],
+    email: ['email'],
+    phone: ['contact_number']
+  },
+  farmProfile: {
+    required: ['livelihood_category_id'],
+    integer: ['livelihood_category_id']
+  },
+  farmParcel: {
+    required: ['parcel_number', 'barangay', 'tenure_type', 'farm_type', 'farm_area'],
+    string: ['parcel_number', 'barangay', 'tenure_type', 'farm_type', 'remarks'],
+    decimal: ['farm_area'],
+    boolean: ['is_ancestral_domain', 'is_agrarian_reform_beneficiary', 'is_organic_practitioner']
+  }
+};
+
+// Validation helper functions
+const validateField = (value, fieldName, rules) => {
+  const errors = [];
+  
+  if (rules.required && rules.required.includes(fieldName)) {
+    if (!value || (typeof value === 'string' && value.trim() === '')) {
+      errors.push(`${fieldName} is required`);
+    }
+  }
+  
+  if (rules.string && rules.string.includes(fieldName)) {
+    if (value && typeof value !== 'string') {
+      errors.push(`${fieldName} must be a string`);
+    }
+  }
+  
+  if (rules.integer && rules.integer.includes(fieldName)) {
+    if (value && (!Number.isInteger(Number(value)) || Number(value) <= 0)) {
+      errors.push(`${fieldName} must be a positive integer`);
+    }
+  }
+  
+  if (rules.decimal && rules.decimal.includes(fieldName)) {
+    if (value && (isNaN(Number(value)) || Number(value) <= 0)) {
+      errors.push(`${fieldName} must be a positive number`);
+    }
+  }
+  
+  if (rules.boolean && rules.boolean.includes(fieldName)) {
+    if (value !== undefined && typeof value !== 'boolean') {
+      errors.push(`${fieldName} must be a boolean`);
+    }
+  }
+  
+  if (rules.email && rules.email.includes(fieldName)) {
+    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      errors.push(`${fieldName} must be a valid email`);
+    }
+  }
+  
+  if (rules.phone && rules.phone.includes(fieldName)) {
+    if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) {
+      errors.push(`${fieldName} must be a valid phone number`);
+    }
+  }
+  
+  return errors;
+};
+
+const validateObject = (data, schema) => {
+  const errors = {};
+  let hasErrors = false;
+  
+  Object.keys(schema).forEach(ruleType => {
+    schema[ruleType].forEach(fieldName => {
+      const fieldErrors = validateField(data[fieldName], fieldName, { [ruleType]: [fieldName] });
+      if (fieldErrors.length > 0) {
+        errors[fieldName] = fieldErrors;
+        hasErrors = true;
+      }
+    });
+  });
+  
+  return { errors, hasErrors };
+};
+
+// Enhanced error logging
+const logError = (context, error, additionalData = {}) => {
+  const errorInfo = {
+    timestamp: new Date().toISOString(),
+    context,
+    error: {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    },
+    additionalData,
+    userAgent: navigator.userAgent,
+    url: window.location.href
+  };
+  
+  console.group(`🚨 RSBSA Error: ${context}`);
+  console.error('Error Details:', errorInfo);
+  console.error('Full Error Object:', error);
+  console.groupEnd();
+  
+  // You can also send this to your error tracking service
+  // Example: Sentry.captureException(error, { extra: errorInfo });
+};
+
 /**
  * RSBSA API Service
  * Handles all API operations for RSBSA (Registry System for Basic Sectors in Agriculture)
@@ -40,13 +150,31 @@ export const rsbsaEnrollmentService = {
   // Create new RSBSA enrollment
   async createEnrollment(enrollmentData) {
     try {
+      console.log('🚀 Creating RSBSA enrollment:', enrollmentData);
+      
+      // Validate enrollment data
+      const validation = validateObject(enrollmentData, {
+        required: ['user_id', 'beneficiary_id', 'enrollment_year', 'enrollment_type'],
+        integer: ['user_id', 'beneficiary_id', 'enrollment_year']
+      });
+      
+      if (validation.hasErrors) {
+        const error = new Error('Enrollment validation failed');
+        error.validationErrors = validation.errors;
+        console.error('❌ Enrollment validation failed:', validation.errors);
+        throw error;
+      }
+      
       const response = await axiosInstance.post(RSBSA_ENDPOINTS.ENROLLMENTS, enrollmentData);
+      console.log('✅ Enrollment created successfully:', response.data);
       return { success: true, data: response.data };
     } catch (error) {
+      logError('Create Enrollment', error, { enrollmentData });
       return { 
         success: false, 
         error: error.response?.data?.message || 'Failed to create enrollment',
-        details: error.response?.data
+        details: error.response?.data,
+        validationErrors: error.validationErrors
       };
     }
   },
@@ -177,13 +305,28 @@ export const beneficiaryDetailsService = {
   // Create beneficiary details
   async createDetails(detailsData) {
     try {
+      console.log('🚀 Creating beneficiary details:', detailsData);
+      
+      // Validate beneficiary data
+      const validation = validateObject(detailsData, VALIDATION_SCHEMAS.beneficiaryDetails);
+      
+      if (validation.hasErrors) {
+        const error = new Error('Beneficiary details validation failed');
+        error.validationErrors = validation.errors;
+        console.error('❌ Beneficiary validation failed:', validation.errors);
+        throw error;
+      }
+      
       const response = await axiosInstance.post(RSBSA_ENDPOINTS.BENEFICIARY_DETAILS, detailsData);
+      console.log('✅ Beneficiary details created successfully:', response.data);
       return { success: true, data: response.data };
     } catch (error) {
+      logError('Create Beneficiary Details', error, { detailsData });
       return { 
         success: false, 
         error: error.response?.data?.message || 'Failed to create beneficiary details',
-        details: error.response?.data
+        details: error.response?.data,
+        validationErrors: error.validationErrors
       };
     }
   },
@@ -576,6 +719,17 @@ export const referenceDataService = {
 export const rsbsaFormService = {
   async submitCompleteForm(formData, userId) {
     try {
+      console.log('🚀 Submitting complete RSBSA form:', { formData, userId });
+      
+      // Validate complete form data
+      const formValidation = this.validateCompleteForm(formData);
+      if (formValidation.hasErrors) {
+        const error = new Error('Form validation failed');
+        error.validationErrors = formValidation.errors;
+        console.error('❌ Form validation failed:', formValidation.errors);
+        throw error;
+      }
+      
       // Step 1: Create beneficiary details
       const beneficiaryResult = await beneficiaryDetailsService.createDetails({
         ...formData.beneficiaryDetails,
@@ -750,6 +904,14 @@ export const rsbsaFormService = {
   // Save draft form data
   async saveDraft(formData, userId) {
     try {
+      console.log('💾 Saving draft form data:', { formData, userId });
+      
+      // Validate draft data (less strict than complete form)
+      const draftValidation = this.validateDraftForm(formData);
+      if (draftValidation.hasErrors) {
+        console.warn('⚠️ Draft validation warnings:', draftValidation.errors);
+      }
+      
       // For draft, we only save to beneficiary details with pending status
       const beneficiaryResult = await beneficiaryDetailsService.createDetails({
         ...formData.beneficiaryDetails,
@@ -762,6 +924,7 @@ export const rsbsaFormService = {
         return beneficiaryResult;
       }
 
+      console.log('✅ Draft saved successfully');
       return {
         success: true,
         data: {
@@ -771,12 +934,101 @@ export const rsbsaFormService = {
       };
 
     } catch (error) {
+      logError('Save Draft', error, { formData, userId });
       return {
         success: false,
         error: 'Failed to save draft',
         details: error.message
       };
     }
+  },
+
+  // Validate complete form data
+  validateCompleteForm(formData) {
+    console.log('🔍 Validating complete form data...');
+    
+    const errors = {};
+    let hasErrors = false;
+
+    // Validate beneficiary details
+    if (formData.beneficiaryDetails) {
+      const beneficiaryValidation = validateObject(formData.beneficiaryDetails, VALIDATION_SCHEMAS.beneficiaryDetails);
+      if (beneficiaryValidation.hasErrors) {
+        errors.beneficiaryDetails = beneficiaryValidation.errors;
+        hasErrors = true;
+      }
+    } else {
+      errors.beneficiaryDetails = { general: ['Beneficiary details are required'] };
+      hasErrors = true;
+    }
+
+    // Validate farm profile
+    if (formData.farmProfile) {
+      const farmProfileValidation = validateObject(formData.farmProfile, VALIDATION_SCHEMAS.farmProfile);
+      if (farmProfileValidation.hasErrors) {
+        errors.farmProfile = farmProfileValidation.errors;
+        hasErrors = true;
+      }
+    } else {
+      errors.farmProfile = { general: ['Farm profile is required'] };
+      hasErrors = true;
+    }
+
+    // Validate farm parcels
+    if (formData.farmParcels && formData.farmParcels.length > 0) {
+      const parcelErrors = [];
+      formData.farmParcels.forEach((parcel, index) => {
+        const parcelValidation = validateObject(parcel, VALIDATION_SCHEMAS.farmParcel);
+        if (parcelValidation.hasErrors) {
+          parcelErrors[index] = parcelValidation.errors;
+        }
+      });
+      
+      if (parcelErrors.length > 0) {
+        errors.farmParcels = parcelErrors;
+        hasErrors = true;
+      }
+    } else {
+      errors.farmParcels = { general: ['At least one farm parcel is required'] };
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      console.error('❌ Form validation errors:', errors);
+    } else {
+      console.log('✅ Form validation passed');
+    }
+
+    return { errors, hasErrors };
+  },
+
+  // Validate draft form data (less strict)
+  validateDraftForm(formData) {
+    console.log('🔍 Validating draft form data...');
+    
+    const errors = {};
+    let hasErrors = false;
+
+    // For draft, only validate required fields if they exist
+    if (formData.beneficiaryDetails) {
+      const requiredFields = ['first_name', 'last_name'];
+      requiredFields.forEach(field => {
+        if (formData.beneficiaryDetails[field] && 
+            typeof formData.beneficiaryDetails[field] === 'string' && 
+            formData.beneficiaryDetails[field].trim() === '') {
+          errors[field] = [`${field} cannot be empty if provided`];
+          hasErrors = true;
+        }
+      });
+    }
+
+    if (hasErrors) {
+      console.warn('⚠️ Draft validation warnings:', errors);
+    } else {
+      console.log('✅ Draft validation passed');
+    }
+
+    return { errors, hasErrors };
   }
 };
 

@@ -35,6 +35,7 @@ import { styled } from '@mui/material/styles';
 
 // Import the custom hook
 import { useRSBSAForm } from './useRSBSAForm';
+import RSBSAErrorBoundary from './ErrorBoundary';
 
 // Import form sections (we'll create these)
 import BeneficiaryProfileSection from './sections/BeneficiaryProfileSection';
@@ -43,6 +44,7 @@ import FarmParcelsSection from './sections/FarmParcelsSection';
 import LivelihoodDetailsSection from './sections/LivelihoodDetailsSection';
 import ReviewSection from './sections/ReviewSection';
 import SubmissionSection from './sections/SubmissionSection';
+import DebugPanel from './DebugPanel';
 
 // Styled components for modern design
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -460,9 +462,30 @@ const RSBSAForm = () => {
             </Grid>
           </Grid>
         </Paper>
+
+        {/* Debug Panel - Only show in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <DebugPanel
+            formData={formData}
+            errors={errors}
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            isLoading={isLoading}
+            isSubmitting={isSubmitting}
+            apiResponse={apiResponse}
+            hasPreFilledData={hasPreFilledData}
+          />
+        )}
       </Container>
     </>
   );
 };
 
-export default RSBSAForm;
+// Wrap the component with ErrorBoundary
+const RSBSAFormWithErrorBoundary = () => (
+  <RSBSAErrorBoundary>
+    <RSBSAForm />
+  </RSBSAErrorBoundary>
+);
+
+export default RSBSAFormWithErrorBoundary;
