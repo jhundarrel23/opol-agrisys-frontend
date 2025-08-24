@@ -99,6 +99,9 @@ Enhanced form hook that integrates with the API and matches the actual database 
 - Validation
 - Step-by-step navigation
 - Auto-loading of existing data
+- **Pre-filled personal information** from existing beneficiary profile
+- **Editable pre-filled data** - users can modify any field
+- **Smart data handling** - updates existing profiles or creates new ones
 
 **Usage:**
 
@@ -278,6 +281,57 @@ The hooks are designed to work with the following database structure:
 
 ### Livelihood Details Tables
 - `farmer_details`, `fisherfolk_details`, `farmworker_details`, `agri_youth_details`
+
+## Pre-filled Personal Information
+
+The RSBSA form automatically loads existing personal information from the user's beneficiary profile and pre-fills the form fields. This data remains fully editable.
+
+### How It Works:
+
+1. **Automatic Loading**: When the form loads, it checks for existing beneficiary details
+2. **Pre-population**: If found, personal information fields are automatically filled
+3. **Editable**: All pre-filled fields remain editable - users can modify any information
+4. **Smart Updates**: The system updates existing profiles or creates new ones as needed
+
+### Usage Example:
+
+```javascript
+const RSBSAForm = () => {
+  const userId = '123';
+  const {
+    formData,
+    updateField,
+    hasPreFilledData, // Check if data was pre-filled
+    submitFormWithValidation
+  } = useRSBSAComplete(userId);
+
+  return (
+    <div>
+      {hasPreFilledData && (
+        <Alert severity="info">
+          Personal information pre-filled from your existing profile. 
+          You can edit any field as needed.
+        </Alert>
+      )}
+      
+      <form>
+        {/* Form fields will be pre-filled if data exists */}
+        <TextField
+          value={formData.beneficiaryDetails.contact_number || ''}
+          onChange={(e) => updateField('beneficiaryDetails', 'contact_number', e.target.value)}
+        />
+      </form>
+    </div>
+  );
+};
+```
+
+### Benefits:
+
+- **User Experience**: No need to re-enter personal information
+- **Data Consistency**: Ensures information is up-to-date
+- **Flexibility**: Users can still modify any field
+- **Efficiency**: Faster form completion
 
 ## Error Handling
 

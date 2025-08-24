@@ -100,6 +100,11 @@ export const useRSBSAComplete = (userId, enrollmentId = null) => {
            formHook.formData.beneficiaryDetails.barangay.trim() !== '';
   }, [referenceDataHook.isLoading, referenceDataHook.hasErrors, formHook.formData.beneficiaryDetails.barangay]);
 
+  // Check if personal data was pre-filled from existing profile
+  const hasPreFilledPersonalData = useCallback(() => {
+    return formHook.hasPreFilledData;
+  }, [formHook.hasPreFilledData]);
+
   // Get form completion status
   const getFormCompletionStatus = useCallback(() => {
     const { formProgress, isValid, canSubmit } = formHook;
@@ -189,6 +194,7 @@ export const useRSBSAComplete = (userId, enrollmentId = null) => {
     getCommodityOptions,
     canSubmitForm,
     canSaveDraft,
+    hasPreFilledPersonalData,
     getFormCompletionStatus,
     getEnrollmentSummary,
     refreshAllData,

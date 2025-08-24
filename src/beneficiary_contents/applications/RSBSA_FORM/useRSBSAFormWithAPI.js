@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { rsbsaFormService, rsbsaEnrollmentService } from '../../../api/rsbsaService';
+import { rsbsaFormService, rsbsaEnrollmentService, beneficiaryDetailsService } from '../../../api/rsbsaService';
 
 /**
  * Enhanced RSBSA Form Hook with API Integration
@@ -152,19 +152,52 @@ export const useRSBSAFormWithAPI = (userId) => {
   // API response states
   const [apiResponse, setApiResponse] = useState(null);
   const [lastSavedDraft, setLastSavedDraft] = useState(null);
+  
+  // Track if personal data was pre-filled
+  const [hasPreFilledData, setHasPreFilledData] = useState(false);
 
-  // Load existing RSBSA data if user has already submitted
+  // Load existing beneficiary details and RSBSA data if user has already submitted
   useEffect(() => {
     if (userId) {
+      loadExistingBeneficiaryData();
       loadExistingRSBSAData();
     }
   }, [userId]);
 
-  // Load existing RSBSA data from API
-  const loadExistingRSBSAData = useCallback(async () => {
+  // Load existing beneficiary details (personal information) from API
+  const loadExistingBeneficiaryData = useCallback(async () => {
     if (!userId) return;
 
     setIsLoading(true);
+    try {
+      // First, try to get existing beneficiary details
+      const beneficiaryResult = await beneficiaryDetailsService.getDetailsByUserId(userId);
+      if (beneficiaryResult.success && beneficiaryResult.data) {
+        // Pre-populate form with existing personal information
+        setFormData(prevData => ({
+          ...prevData,
+          beneficiaryDetails: {
+            ...prevData.beneficiaryDetails,
+            ...beneficiaryResult.data,
+            // Keep the form editable by not setting readonly flags
+            // The user can still modify these fields
+          }
+        }));
+        
+        // Mark that we have pre-filled data
+        setHasPreFilledData(true);
+      }
+    } catch (error) {
+      console.error('Error loading existing beneficiary data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
+
+  // Load existing RSBSA enrollment data if user has already submitted
+  const loadExistingRSBSAData = useCallback(async () => {
+    if (!userId) return;
+
     try {
       const result = await rsbsaFormService.getCompleteRSBSAData(userId);
       if (result.success && result.data) {
@@ -173,6 +206,7 @@ export const useRSBSAFormWithAPI = (userId) => {
         
         setFormData(prevData => ({
           ...prevData,
+          // Update beneficiary details with any RSBSA-specific data
           beneficiaryDetails: {
             ...prevData.beneficiaryDetails,
             ...beneficiaryDetails
@@ -197,8 +231,6 @@ export const useRSBSAFormWithAPI = (userId) => {
       }
     } catch (error) {
       console.error('Error loading existing RSBSA data:', error);
-    } finally {
-      setIsLoading(false);
     }
   }, [userId]);
 
@@ -347,15 +379,41 @@ export const useRSBSAFormWithAPI = (userId) => {
 
     setIsSavingDraft(true);
     try {
-      const result = await rsbsaFormService.saveDraft(formData, userId);
+      // Check if beneficiary details already exist
+      const existingBeneficiary = await beneficiaryDetailsService.getDetailsByUserId(userId);
       
-      if (result.success) {
-        setLastSavedDraft(result.data);
-        setApiResponse({ success: true, message: 'Draft saved successfully' });
-        return true;
+      let result;
+      if (existingBeneficiary.success && existingBeneficiary.data) {
+        // Update existing beneficiary details with draft data
+        const updateResult = await beneficiaryDetailsService.updateDetails(
+          existingBeneficiary.data.id, 
+          {
+            ...formData.beneficiaryDetails,
+            profile_completion_status: 'pending',
+            last_updated_by_beneficiary: new Date().toISOString()
+          }
+        );
+        
+        if (updateResult.success) {
+          setLastSavedDraft(updateResult.data);
+          setApiResponse({ success: true, message: 'Draft updated successfully' });
+          return true;
+        } else {
+          setApiResponse({ success: false, error: 'Failed to update draft' });
+          return false;
+        }
       } else {
-        setApiResponse({ success: false, error: result.error });
-        return false;
+        // Create new beneficiary details as draft
+        result = await rsbsaFormService.saveDraft(formData, userId);
+        
+        if (result.success) {
+          setLastSavedDraft(result.data);
+          setApiResponse({ success: true, message: 'Draft saved successfully' });
+          return true;
+        } else {
+          setApiResponse({ success: false, error: result.error });
+          return false;
+        }
       }
     } catch (error) {
       setApiResponse({ success: false, error: 'Failed to save draft' });
@@ -378,7 +436,28 @@ export const useRSBSAFormWithAPI = (userId) => {
 
     setIsSubmitting(true);
     try {
-      const result = await rsbsaFormService.submitCompleteForm(formData, userId);
+      // Check if beneficiary details already exist
+      const existingBeneficiary = await beneficiaryDetailsService.getDetailsByUserId(userId);
+      
+      let result;
+      if (existingBeneficiary.success && existingBeneficiary.data) {
+        // Update existing beneficiary details first
+        const updateResult = await beneficiaryDetailsService.updateDetails(
+          existingBeneficiary.data.id, 
+          formData.beneficiaryDetails
+        );
+        
+        if (!updateResult.success) {
+          setApiResponse({ success: false, error: 'Failed to update beneficiary details' });
+          return false;
+        }
+        
+        // Then submit the complete RSBSA form
+        result = await rsbsaFormService.submitCompleteForm(formData, userId);
+      } else {
+        // Create new beneficiary details and submit RSBSA form
+        result = await rsbsaFormService.submitCompleteForm(formData, userId);
+      }
       
       if (result.success) {
         setApiResponse({ success: true, message: 'Form submitted successfully', data: result.data });
@@ -561,6 +640,7 @@ export const useRSBSAFormWithAPI = (userId) => {
     totalSteps,
     apiResponse,
     lastSavedDraft,
+    hasPreFilledData,
 
     // Actions
     updateField,
