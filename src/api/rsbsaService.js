@@ -12,7 +12,7 @@ const RSBSA_ENDPOINTS = {
   ENROLLMENT_STATUS: '/api/rsbsa/enrollments/status',
   
   // Profile endpoints
-  BENEFICIARY_PROFILES: '/api/rsbsa/beneficiary-profiles',
+  BENEFICIARY_DETAILS: '/api/rsbsa/beneficiary-details',
   FARM_PROFILES: '/api/rsbsa/farm-profiles',
   
   // Detail endpoints
@@ -79,6 +79,20 @@ export const rsbsaEnrollmentService = {
     }
   },
 
+  // Get enrollment by beneficiary ID
+  async getEnrollmentByBeneficiaryId(beneficiaryId) {
+    try {
+      const response = await axiosInstance.get(`${RSBSA_ENDPOINTS.ENROLLMENTS}/beneficiary/${beneficiaryId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Failed to fetch beneficiary enrollment',
+        details: error.response?.data
+      };
+    }
+  },
+
   // Update enrollment
   async updateEnrollment(enrollmentId, updateData) {
     try {
@@ -105,64 +119,126 @@ export const rsbsaEnrollmentService = {
         details: error.response?.data
       };
     }
+  },
+
+  // Submit enrollment for review
+  async submitEnrollment(enrollmentId) {
+    try {
+      const response = await axiosInstance.put(`${RSBSA_ENDPOINTS.ENROLLMENTS}/${enrollmentId}/submit`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Failed to submit enrollment',
+        details: error.response?.data
+      };
+    }
+  },
+
+  // Approve enrollment
+  async approveEnrollment(enrollmentId, rsbsaNumber, coordinatorNotes = '') {
+    try {
+      const response = await axiosInstance.put(`${RSBSA_ENDPOINTS.ENROLLMENTS}/${enrollmentId}/approve`, {
+        assigned_rsbsa_number: rsbsaNumber,
+        coordinator_notes: coordinatorNotes
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Failed to approve enrollment',
+        details: error.response?.data
+      };
+    }
+  },
+
+  // Reject enrollment
+  async rejectEnrollment(enrollmentId, rejectionReason, coordinatorNotes = '') {
+    try {
+      const response = await axiosInstance.put(`${RSBSA_ENDPOINTS.ENROLLMENTS}/${enrollmentId}/reject`, {
+        rejection_reason: rejectionReason,
+        coordinator_notes: coordinatorNotes
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Failed to reject enrollment',
+        details: error.response?.data
+      };
+    }
   }
 };
 
 /**
- * Beneficiary Profile Operations
+ * Beneficiary Details Operations
  */
-export const beneficiaryProfileService = {
-  // Create beneficiary profile
-  async createProfile(profileData) {
+export const beneficiaryDetailsService = {
+  // Create beneficiary details
+  async createDetails(detailsData) {
     try {
-      const response = await axiosInstance.post(RSBSA_ENDPOINTS.BENEFICIARY_PROFILES, profileData);
+      const response = await axiosInstance.post(RSBSA_ENDPOINTS.BENEFICIARY_DETAILS, detailsData);
       return { success: true, data: response.data };
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Failed to create beneficiary profile',
+        error: error.response?.data?.message || 'Failed to create beneficiary details',
         details: error.response?.data
       };
     }
   },
 
-  // Get profile by ID
-  async getProfile(profileId) {
+  // Get details by ID
+  async getDetails(detailsId) {
     try {
-      const response = await axiosInstance.get(`${RSBSA_ENDPOINTS.BENEFICIARY_PROFILES}/${profileId}`);
+      const response = await axiosInstance.get(`${RSBSA_ENDPOINTS.BENEFICIARY_DETAILS}/${detailsId}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Failed to fetch beneficiary profile',
+        error: error.response?.data?.message || 'Failed to fetch beneficiary details',
         details: error.response?.data
       };
     }
   },
 
-  // Get profile by user ID
-  async getProfileByUserId(userId) {
+  // Get details by user ID
+  async getDetailsByUserId(userId) {
     try {
-      const response = await axiosInstance.get(`${RSBSA_ENDPOINTS.BENEFICIARY_PROFILES}/user/${userId}`);
+      const response = await axiosInstance.get(`${RSBSA_ENDPOINTS.BENEFICIARY_DETAILS}/user/${userId}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Failed to fetch user profile',
+        error: error.response?.data?.message || 'Failed to fetch user details',
         details: error.response?.data
       };
     }
   },
 
-  // Update profile
-  async updateProfile(profileId, updateData) {
+  // Update details
+  async updateDetails(detailsId, updateData) {
     try {
-      const response = await axiosInstance.put(`${RSBSA_ENDPOINTS.BENEFICIARY_PROFILES}/${profileId}`, updateData);
+      const response = await axiosInstance.put(`${RSBSA_ENDPOINTS.BENEFICIARY_DETAILS}/${detailsId}`, updateData);
       return { success: true, data: response.data };
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Failed to update beneficiary profile',
+        error: error.response?.data?.message || 'Failed to update beneficiary details',
+        details: error.response?.data
+      };
+    }
+  },
+
+  // Check RSBSA number availability
+  async checkRSBSANumberAvailability(rsbsaNumber) {
+    try {
+      const response = await axiosInstance.get(`${RSBSA_ENDPOINTS.BENEFICIARY_DETAILS}/check-rsbsa/${rsbsaNumber}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Failed to check RSBSA number availability',
         details: error.response?.data
       };
     }
@@ -500,22 +576,24 @@ export const referenceDataService = {
 export const rsbsaFormService = {
   async submitCompleteForm(formData, userId) {
     try {
-      // Step 1: Create beneficiary profile
-      const beneficiaryResult = await beneficiaryProfileService.createProfile({
-        ...formData.beneficiaryProfile,
-        user_id: userId
+      // Step 1: Create beneficiary details
+      const beneficiaryResult = await beneficiaryDetailsService.createDetails({
+        ...formData.beneficiaryDetails,
+        user_id: userId,
+        profile_completion_status: 'completed',
+        data_source: 'self_registration'
       });
 
       if (!beneficiaryResult.success) {
         return beneficiaryResult;
       }
 
-      const beneficiaryProfileId = beneficiaryResult.data.id;
+      const beneficiaryDetailsId = beneficiaryResult.data.id;
 
       // Step 2: Create farm profile
       const farmProfileResult = await farmProfileService.createProfile({
         ...formData.farmProfile,
-        beneficiary_id: beneficiaryProfileId
+        beneficiary_id: beneficiaryDetailsId
       });
 
       if (!farmProfileResult.success) {
@@ -566,11 +644,13 @@ export const rsbsaFormService = {
 
       // Step 5: Create RSBSA enrollment
       const enrollmentResult = await rsbsaEnrollmentService.createEnrollment({
-        ...formData.enrollment,
         user_id: userId,
+        beneficiary_id: beneficiaryDetailsId,
         farm_profile_id: farmProfileId,
-        reference_code: `RSBSA-${Date.now()}`,
-        status: 'verifying',
+        application_reference_code: `RSBSA-${Date.now()}`,
+        enrollment_year: new Date().getFullYear(),
+        enrollment_type: 'new',
+        application_status: 'submitted',
         submitted_at: new Date().toISOString()
       });
 
@@ -582,7 +662,7 @@ export const rsbsaFormService = {
         success: true,
         data: {
           enrollment: enrollmentResult.data,
-          beneficiaryProfile: beneficiaryResult.data,
+          beneficiaryDetails: beneficiaryResult.data,
           farmProfile: farmProfileResult.data,
           farmParcels: parcelsResult.data,
           livelihoodDetails: livelihoodDetailsResult.data
@@ -613,8 +693,8 @@ export const rsbsaFormService = {
         return { success: true, data: null, message: 'No RSBSA enrollment found' };
       }
 
-      // Get beneficiary profile
-      const beneficiaryResult = await beneficiaryProfileService.getProfileByUserId(userId);
+      // Get beneficiary details
+      const beneficiaryResult = await beneficiaryDetailsService.getDetailsByUserId(userId);
       if (!beneficiaryResult.success) {
         return beneficiaryResult;
       }
@@ -651,7 +731,7 @@ export const rsbsaFormService = {
         success: true,
         data: {
           enrollment,
-          beneficiaryProfile: beneficiaryResult.data,
+          beneficiaryDetails: beneficiaryResult.data,
           farmProfile: farmProfileResult.data,
           farmParcels: parcelsResult.data,
           livelihoodDetails
@@ -665,13 +745,45 @@ export const rsbsaFormService = {
         details: error.message
       };
     }
+  },
+
+  // Save draft form data
+  async saveDraft(formData, userId) {
+    try {
+      // For draft, we only save to beneficiary details with pending status
+      const beneficiaryResult = await beneficiaryDetailsService.createDetails({
+        ...formData.beneficiaryDetails,
+        user_id: userId,
+        profile_completion_status: 'pending',
+        data_source: 'self_registration'
+      });
+
+      if (!beneficiaryResult.success) {
+        return beneficiaryResult;
+      }
+
+      return {
+        success: true,
+        data: {
+          beneficiaryDetails: beneficiaryResult.data
+        },
+        message: 'Draft saved successfully'
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to save draft',
+        details: error.message
+      };
+    }
   }
 };
 
 // Export all services
 export default {
   rsbsaEnrollmentService,
-  beneficiaryProfileService,
+  beneficiaryDetailsService,
   farmProfileService,
   farmParcelsService,
   livelihoodDetailsService,
