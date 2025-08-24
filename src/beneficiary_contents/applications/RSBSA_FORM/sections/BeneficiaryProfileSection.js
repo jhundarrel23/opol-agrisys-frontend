@@ -90,7 +90,7 @@ const BeneficiaryProfileSection = ({ formData, errors, updateField }) => {
                       <Select
                         value={formData.barangay || ''}
                         onChange={(e) => handleFieldChange('barangay', e.target.value)}
-                        label="Barangay *"
+                        label="Barangay *"  
                       >
                         {barangayOptions.map((barangay) => (
                           <MenuItem key={barangay} value={barangay}>

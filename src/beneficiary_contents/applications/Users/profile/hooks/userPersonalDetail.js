@@ -5,6 +5,7 @@ const usePersonalDetails = (userId = null) => {
   // Initialize form data with default values matching the Laravel migration schema
   const [formData, setFormData] = useState({
     // RSBSA INFORMATION & VERIFICATION (matches beneficiary_details table)
+    id: null, // Will be set if record exists
     system_generated_rsbsa_number: '',
     manual_rsbsa_number: '',
     rsbsa_verification_status: 'not_verified', // enum: not_verified, pending, verified, rejected
@@ -62,7 +63,7 @@ const usePersonalDetails = (userId = null) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [isExistingRecord, setIsExistingRecord] = useState(false);
+  const [isExistingRecord, setIsExistingRecord] = useState(false); // Track if record exists
 
   // Barangay options for Opol, Misamis Oriental
   const barangayOptions = [
@@ -97,6 +98,20 @@ const usePersonalDetails = (userId = null) => {
     { value: 'yes', label: 'Yes' },
     { value: 'no', label: 'No' }
   ];
+
+  // Transform data for backend (convert sex to lowercase, etc.)
+  const transformToBackend = useCallback((data) => ({
+    ...data,
+    sex: data.sex.toLowerCase(),
+    last_updated_by_beneficiary: new Date().toISOString(),
+    profile_completion_status: 'completed'
+  }), []);
+
+  // Transform data from backend (convert sex to title case, etc.)
+  const transformFromBackend = useCallback((data) => ({
+    ...data,
+    sex: data.sex ? data.sex.charAt(0).toUpperCase() + data.sex.slice(1) : '',
+  }), []);
 
   // Update field function
   const updateField = useCallback((field, value) => {
@@ -187,22 +202,17 @@ const usePersonalDetails = (userId = null) => {
     return Object.keys(newErrors).length === 0;
   }, [formData]);
 
-  // Load data function with Laravel API integration
+  // Load data function with API integration
   const loadPersonalDetails = useCallback(async (id) => {
     if (!id) return;
     
     setLoading(true);
     try {
-      // Use axios to get beneficiary details from Laravel backend
+      // API call to get beneficiary details from Laravel backend
       const response = await axiosInstance.get(`/api/beneficiary-details/${id}`);
       
       if (response.data.success) {
-        const backendData = response.data.data;
-        // Transform data from backend format
-        const transformedData = {
-          ...backendData,
-          sex: backendData.sex ? backendData.sex.charAt(0).toUpperCase() + backendData.sex.slice(1) : '',
-        };
+        const transformedData = transformFromBackend(response.data.data);
         setFormData(transformedData);
         setIsExistingRecord(true);
       }
@@ -211,11 +221,12 @@ const usePersonalDetails = (userId = null) => {
       // If record doesn't exist (404), it's not an error - user just hasn't created profile yet
       if (error.response?.status === 404) {
         setIsExistingRecord(false);
-        // Load from localStorage as fallback
+
         const savedData = localStorage.getItem(`personal_details_${id}`);
         if (savedData) {
           const parsedData = JSON.parse(savedData);
-          setFormData(parsedData);
+          const transformedData = transformFromBackend(parsedData);
+          setFormData(transformedData);
           setIsExistingRecord(true);
         }
       } else {
@@ -224,9 +235,39 @@ const usePersonalDetails = (userId = null) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [transformFromBackend]);
 
-  // Save data function with Laravel backend integration
+  // Calculate completion percentage - Enhanced version with required vs optional fields
+  const getCompletionPercentage = useCallback(() => {
+    const requiredFields = [
+      'barangay', 'contact_number', 'birth_date', 'sex', 'civil_status'
+    ];
+    const optionalFields = [
+      'emergency_contact_number', 'place_of_birth', 'highest_education', 
+      'religion', 'mothers_maiden_name'
+    ];
+    
+    const totalFields = requiredFields.length + optionalFields.length;
+    let completedFields = 0;
+
+    // Count required fields
+    requiredFields.forEach(field => {
+      if (formData[field] && formData[field] !== '') {
+        completedFields++;
+      }
+    });
+
+    // Count optional fields
+    optionalFields.forEach(field => {
+      if (formData[field] && formData[field] !== '') {
+        completedFields++;
+      }
+    });
+
+    return Math.round((completedFields / totalFields) * 100);
+  }, [formData]);
+
+  // Save data function with UPSERT logic
   const savePersonalDetails = useCallback(async () => {
     if (!validateForm()) {
       return false;
@@ -234,31 +275,22 @@ const usePersonalDetails = (userId = null) => {
 
     setSaving(true);
     try {
-      // Prepare data for Laravel backend (beneficiary_details table)
-      const backendData = {
-        ...formData,
-        // Convert sex to lowercase for backend enum
-        sex: formData.sex.toLowerCase(),
-        // Update tracking fields
-        last_updated_by_beneficiary: new Date().toISOString(),
-        profile_completion_status: 'completed'
-      };
+      const backendData = transformToBackend(formData);
 
-      // UPSERT: Use Laravel API with axios - handles create/update automatically
+      // UPSERT Logic: Use POST for both create and update
+      // The backend controller handles the updateOrCreate logic
       const payload = {
         user_id: userId,
         ...backendData
       };
 
+      // API call to save/update beneficiary details
       const response = await axiosInstance.post('/api/beneficiary-details', payload);
-      
+
       if (response.data.success) {
         const savedData = response.data.data;
         // Transform data back from backend
-        const transformedData = {
-          ...savedData,
-          sex: savedData.sex ? savedData.sex.charAt(0).toUpperCase() + savedData.sex.slice(1) : '',
-        };
+        const transformedData = transformFromBackend(savedData);
         setFormData(transformedData);
         setIsExistingRecord(true);
         
@@ -266,46 +298,43 @@ const usePersonalDetails = (userId = null) => {
         if (userId) {
           localStorage.setItem(`personal_details_${userId}`, JSON.stringify(transformedData));
         }
+
+        // Update completion tracking
+        const completedFields = Object.keys(formData).filter(key => {
+          const value = formData[key];
+          return value !== '' && value !== null && value !== undefined;
+        });
+
+        const updatedTracking = {
+          completed_fields: completedFields,
+          completion_percentage: getCompletionPercentage(),
+          last_updated: new Date().toISOString()
+        };
+
+        updateField('completion_tracking', updatedTracking);
+        updateField('profile_completion_status', 'completed');
+        updateField('last_updated_by_beneficiary', new Date().toISOString());
+
+        return true;
       }
-
-      // Update completion tracking
-      const completedFields = Object.keys(formData).filter(key => {
-        const value = formData[key];
-        return value !== '' && value !== null && value !== undefined;
-      });
-
-      updateField('completion_tracking', {
-        completed_fields: completedFields,
-        completion_percentage: Math.round((completedFields.length / Object.keys(formData).length) * 100),
-        last_updated: new Date().toISOString()
-      });
-
-      updateField('profile_completion_status', 'completed');
-      updateField('last_updated_by_beneficiary', new Date().toISOString());
-
-      return true;
+      
+      // If response.data.success is false, return false
+      return false;
     } catch (error) {
       console.error('Error saving personal details:', error);
+      setErrors({ 
+        general: error.response?.data?.message || 'Failed to save profile data' 
+      });
       return false;
     } finally {
       setSaving(false);
     }
-  }, [formData, userId, validateForm, updateField]);
-
-  // Calculate completion percentage
-  const getCompletionPercentage = useCallback(() => {
-    const totalFields = Object.keys(formData).length;
-    const completedFields = Object.keys(formData).filter(key => {
-      const value = formData[key];
-      return value !== '' && value !== null && value !== undefined && value !== false;
-    }).length;
-
-    return Math.round((completedFields / totalFields) * 100);
-  }, [formData]);
+  }, [formData, userId, validateForm, updateField, transformToBackend, transformFromBackend, getCompletionPercentage]);
 
   // Reset form
   const resetForm = useCallback(() => {
     setFormData({
+      id: null,
       system_generated_rsbsa_number: '',
       manual_rsbsa_number: '',
       rsbsa_verification_status: 'not_verified',
@@ -335,7 +364,10 @@ const usePersonalDetails = (userId = null) => {
       profile_completion_status: 'pending',
       is_profile_verified: false,
       verification_notes: '',
+      profile_verified_at: null,
+      profile_verified_by: null,
       data_source: 'self_registration',
+      last_updated_by_beneficiary: null,
       completion_tracking: {}
     });
     setErrors({});
@@ -354,7 +386,7 @@ const usePersonalDetails = (userId = null) => {
     errors,
     loading,
     saving,
-    isExistingRecord,
+    isExistingRecord, // Tells you if this is an update or insert
     barangayOptions,
     civilStatusOptions,
     educationOptions,
@@ -365,9 +397,12 @@ const usePersonalDetails = (userId = null) => {
     savePersonalDetails,
     getCompletionPercentage,
     resetForm,
-    // Additional helper flags
+    // Explicit CRUD operations
     isCreate: !isExistingRecord,
-    isUpdate: isExistingRecord
+    isUpdate: isExistingRecord,
+    // Utility functions for external use/testing
+    transformToBackend,
+    transformFromBackend
   };
 };
 
