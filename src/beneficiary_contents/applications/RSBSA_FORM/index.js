@@ -35,7 +35,6 @@ import { styled } from '@mui/material/styles';
 
 // Import the custom hook
 import { useRSBSAFormWithAPI } from './useRSBSAFormWithAPI';
-import RSBSAErrorBoundary from './ErrorBoundary';
 
 // Import form sections (we'll create these)
 import BeneficiaryProfileSection from './sections/BeneficiaryProfileSection';
@@ -44,7 +43,6 @@ import FarmParcelsSection from './sections/FarmParcelsSection';
 import LivelihoodDetailsSection from './sections/LivelihoodDetailsSection';
 import ReviewSection from './sections/ReviewSection';
 import SubmissionSection from './sections/SubmissionSection';
-import DebugPanel from './DebugPanel';
 
 // Styled components for modern design
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -126,19 +124,7 @@ const RSBSAForm = () => {
     hasPreFilledData
   } = useRSBSAFormWithAPI(userId);
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h5" gutterBottom>
-            Loading RSBSA Form...
-          </Typography>
-          <LinearProgress sx={{ mt: 2 }} />
-        </Box>
-      </Container>
-    );
-  }
+  // Loading state will be handled in the render method
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -288,6 +274,16 @@ const RSBSAForm = () => {
       </Helmet>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* Loading State */}
+        {isLoading && (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h5" gutterBottom>
+              Loading RSBSA Form...
+            </Typography>
+            <LinearProgress sx={{ mt: 2 }} />
+          </Box>
+        )}
+
         {/* Header Section */}
         <Paper 
           elevation={0} 
@@ -312,7 +308,8 @@ const RSBSAForm = () => {
         </Paper>
 
         {/* Progress Indicator */}
-        <ProgressContainer>
+        {!isLoading && (
+          <ProgressContainer>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
             <Typography variant="h6" color="primary" fontWeight="bold">
               Form Progress
@@ -340,6 +337,7 @@ const RSBSAForm = () => {
             Step {currentStep} of {totalSteps}: {steps[currentStep - 1]?.description}
           </Typography>
         </ProgressContainer>
+        )}
 
         {/* Success/Error Messages */}
         <Fade in={showSuccess}>
@@ -366,7 +364,8 @@ const RSBSAForm = () => {
         </Fade>
 
         {/* Main Form Card */}
-        <StyledCard>
+        {!isLoading && (
+          <StyledCard>
           <CardContent sx={{ p: 4 }}>
             {/* Stepper */}
             <StyledStepper activeStep={currentStep - 1} alternativeLabel>
@@ -453,19 +452,21 @@ const RSBSAForm = () => {
             </ActionButtonContainer>
           </CardContent>
         </StyledCard>
+        )}
 
         {/* Form Information Footer */}
-        <Paper 
-          elevation={0} 
-          sx={{ 
-            mt: 4, 
-            p: 3, 
-            backgroundColor: 'background.default',
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'divider'
-          }}
-        >
+        {!isLoading && (
+          <Paper 
+            elevation={0} 
+            sx={{ 
+              mt: 4, 
+              p: 3, 
+              backgroundColor: 'background.default',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider'
+            }}
+          >
           <Typography variant="h6" gutterBottom color="primary">
             Important Information
           </Typography>
@@ -487,30 +488,11 @@ const RSBSAForm = () => {
             </Grid>
           </Grid>
         </Paper>
-
-        {/* Debug Panel - Only show in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <DebugPanel
-            formData={formData}
-            errors={errors}
-            currentStep={currentStep}
-            totalSteps={totalSteps}
-            isLoading={isLoading}
-            isSubmitting={isSubmitting}
-            apiResponse={apiResponse}
-            hasPreFilledData={hasPreFilledData}
-          />
         )}
+
       </Container>
     </>
   );
 };
 
-// Wrap the component with ErrorBoundary
-const RSBSAFormWithErrorBoundary = () => (
-  <RSBSAErrorBoundary>
-    <RSBSAForm />
-  </RSBSAErrorBoundary>
-);
-
-export default RSBSAFormWithErrorBoundary;
+export default RSBSAForm;
