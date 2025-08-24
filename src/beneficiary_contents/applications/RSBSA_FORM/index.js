@@ -215,22 +215,15 @@ const RSBSAForm = () => {
     }
   };
 
-  // Save draft
-  const handleSaveDraft = () => {
-    // Data is automatically saved to localStorage via the hook
-    // eslint-disable-next-line no-alert
-    alert('Draft saved successfully!');
-  };
-
   // Render current step content
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
           <BeneficiaryProfileSection
-            formData={formData.beneficiaryProfile}
+            formData={formData.beneficiaryDetails}
             errors={errors}
-            updateField={(field, value) => updateField('beneficiaryProfile', field, value)}
+            updateField={(field, value) => updateField('beneficiaryDetails', field, value)}
           />
         );
       case 2:
@@ -276,7 +269,7 @@ const RSBSAForm = () => {
             formData={formData}
             isSubmitting={isSubmitting}
             onSubmit={handleSubmit}
-            canSubmit={canSubmit}
+            canSubmit={validateForm()}
           />
         );
       default:
@@ -325,7 +318,7 @@ const RSBSAForm = () => {
               Form Progress
             </Typography>
             <Chip 
-              label={`${formProgress}% Complete`}
+              label={`${Math.round((currentStep / totalSteps) * 100)}% Complete`}
               color="primary"
               variant="outlined"
               sx={{ fontWeight: 'bold' }}
@@ -333,7 +326,7 @@ const RSBSAForm = () => {
           </Box>
           <LinearProgress 
             variant="determinate" 
-            value={formProgress} 
+            value={(currentStep / totalSteps) * 100} 
             sx={{ 
               height: 8, 
               borderRadius: 4,
