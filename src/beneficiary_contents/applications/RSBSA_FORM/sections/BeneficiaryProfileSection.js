@@ -85,23 +85,23 @@ const BeneficiaryProfileSection = ({ formData, errors, updateField }) => {
                 <Grid container spacing={3}>
                   {/* Location Information */}
                   <Grid item xs={12} md={6}>
-                    <FormControl fullWidth error={!!errors['beneficiaryProfile.barangay']}>
-                      <InputLabel>Barangay *</InputLabel>
-                      <Select
-                        value={formData.barangay || ''}
-                        onChange={(e) => handleFieldChange('barangay', e.target.value)}
-                        label="Barangay *"
-                      >
-                        {barangayOptions.map((barangay) => (
-                          <MenuItem key={barangay} value={barangay}>
-                            {barangay}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {errors['beneficiaryProfile.barangay'] && (
-                        <FormHelperText>{errors['beneficiaryProfile.barangay']}</FormHelperText>
-                      )}
-                    </FormControl>
+                                                        <FormControl fullWidth error={!!errors['beneficiaryDetails.barangay']}>
+                    <InputLabel>Barangay *</InputLabel>
+                    <Select
+                      value={formData.barangay || ''}
+                      onChange={(e) => handleFieldChange('barangay', e.target.value)}
+                      label="Barangay *"
+                    >
+                      {barangayOptions.map((barangay) => (
+                        <MenuItem key={barangay} value={barangay}>
+                          {barangay}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {errors['beneficiaryDetails.barangay'] && (
+                      <FormHelperText>{errors['beneficiaryDetails.barangay']}</FormHelperText>
+                    )}
+                  </FormControl>
                   </Grid>
 
                   <Grid item xs={12} md={6}>

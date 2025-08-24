@@ -124,32 +124,32 @@ const ReviewSection = ({ formData, errors, onEdit }) => {
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Location:</strong> {formData.beneficiaryProfile.barangay}, {formData.beneficiaryProfile.municipality}, {formData.beneficiaryProfile.province}
+                    <strong>Location:</strong> {formData.beneficiaryDetails?.barangay || 'Not specified'}, {formData.beneficiaryDetails?.municipality || 'Not specified'}, {formData.beneficiaryDetails?.province || 'Not specified'}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Contact Number:</strong> {formData.beneficiaryProfile.contact_number || 'Not provided'}
+                    <strong>Contact Number:</strong> {formData.beneficiaryDetails?.contact_number || 'Not provided'}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Birth Date:</strong> {formatDate(formData.beneficiaryProfile.birth_date)}
+                    <strong>Birth Date:</strong> {formatDate(formData.beneficiaryDetails?.birth_date)}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Civil Status:</strong> {formatEnum(formData.beneficiaryProfile.civil_status)}
+                    <strong>Civil Status:</strong> {formatEnum(formData.beneficiaryDetails?.civil_status)}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Education:</strong> {formatEnum(formData.beneficiaryProfile.highest_education)}
+                    <strong>Education:</strong> {formatEnum(formData.beneficiaryDetails?.highest_education)}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>PWD Status:</strong> {formatBoolean(formData.beneficiaryProfile.pwd)}
+                    <strong>PWD Status:</strong> {formatBoolean(formData.beneficiaryDetails?.is_pwd)}
                   </Typography>
                 </Grid>
               </Grid>
