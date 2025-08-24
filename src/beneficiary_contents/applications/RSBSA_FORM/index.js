@@ -16,7 +16,6 @@ import {
   Fade,
   Paper,
   Chip,
-  IconButton,
   Tooltip
 } from '@mui/material';
 import {
@@ -122,8 +121,7 @@ const RSBSAForm = () => {
     submitForm,
     saveDraft,
     resetForm,
-    apiResponse,
-    hasPreFilledData
+
   } = useRSBSAFormWithAPI(userId);
 
   console.log('🔍 RSBSA Form: Hook data loaded:', {

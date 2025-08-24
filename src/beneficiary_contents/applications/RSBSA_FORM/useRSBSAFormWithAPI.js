@@ -1,12 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
-  rsbsaEnrollmentService, 
   beneficiaryDetailsService, 
-  farmProfileService, 
-  farmParcelsService, 
-  livelihoodDetailsService,
   rsbsaFormService 
-} from '../../../../api/rsbsaService';
+} from '../../../api/rsbsaService';
 
 // Enhanced error logging for hooks
 const logHookError = (context, error, additionalData = {}) => {
@@ -29,95 +25,7 @@ const logHookError = (context, error, additionalData = {}) => {
   console.groupEnd();
 };
 
-// Form validation helper
-const validateFormStep = (stepData, stepName) => {
-  console.log(`🔍 Validating ${stepName} step:`, stepData);
-  
-  const errors = {};
-  let hasErrors = false;
 
-  switch (stepName) {
-    case 'beneficiaryDetails':
-      if (!stepData.first_name?.trim()) {
-        errors.first_name = ['First name is required'];
-        hasErrors = true;
-      }
-      if (!stepData.last_name?.trim()) {
-        errors.last_name = ['Last name is required'];
-        hasErrors = true;
-      }
-      if (!stepData.contact_number?.trim()) {
-        errors.contact_number = ['Contact number is required'];
-        hasErrors = true;
-      }
-      if (!stepData.barangay?.trim()) {
-        errors.barangay = ['Barangay is required'];
-        hasErrors = true;
-      }
-      if (!stepData.municipality?.trim()) {
-        errors.municipality = ['Municipality is required'];
-        hasErrors = true;
-      }
-      if (!stepData.province?.trim()) {
-        errors.province = ['Province is required'];
-        hasErrors = true;
-      }
-      if (!stepData.region?.trim()) {
-        errors.region = ['Region is required'];
-        hasErrors = true;
-      }
-      break;
-
-    case 'farmProfile':
-      if (!stepData.livelihood_category_id) {
-        errors.livelihood_category_id = ['Livelihood category is required'];
-        hasErrors = true;
-      }
-      break;
-
-    case 'farmParcels':
-      if (!stepData || stepData.length === 0) {
-        errors.general = ['At least one farm parcel is required'];
-        hasErrors = true;
-      } else {
-        stepData.forEach((parcel, index) => {
-          const parcelErrors = {};
-          if (!parcel.parcel_number?.trim()) {
-            parcelErrors.parcel_number = ['Parcel number is required'];
-          }
-          if (!parcel.barangay?.trim()) {
-            parcelErrors.barangay = ['Barangay is required'];
-          }
-          if (!parcel.tenure_type?.trim()) {
-            parcelErrors.tenure_type = ['Tenure type is required'];
-          }
-          if (!parcel.farm_type?.trim()) {
-            parcelErrors.farm_type = ['Farm type is required'];
-          }
-          if (!parcel.farm_area || Number(parcel.farm_area) <= 0) {
-            parcelErrors.farm_area = ['Farm area must be greater than 0'];
-          }
-          
-          if (Object.keys(parcelErrors).length > 0) {
-            errors[index] = parcelErrors;
-            hasErrors = true;
-          }
-        });
-      }
-      break;
-
-    default:
-      console.warn(`⚠️ Unknown step for validation: ${stepName}`);
-  }
-
-  if (hasErrors) {
-    console.error(`❌ ${stepName} validation failed:`, errors);
-  } else {
-    console.log(`✅ ${stepName} validation passed`);
-  }
-
-  return { errors, hasErrors };
-};
 
 /**
  * Enhanced RSBSA Form Hook with API Integration
@@ -467,9 +375,8 @@ export const useRSBSAFormWithAPI = (userId) => {
 
     if (Object.keys(newErrors).length > 0) {
       console.error('❌ Form validation failed:', newErrors);
-    } else {
-      console.log('✅ Form validation passed');
     }
+    console.log('✅ Form validation passed');
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -524,10 +431,9 @@ export const useRSBSAFormWithAPI = (userId) => {
           setLastSavedDraft(updateResult.data);
           setApiResponse({ success: true, message: 'Draft updated successfully' });
           return true;
-        } else {
-          setApiResponse({ success: false, error: 'Failed to update draft' });
-          return false;
         }
+        setApiResponse({ success: false, error: 'Failed to update draft' });
+        return false;
       } else {
         // Create new beneficiary details as draft
         result = await rsbsaFormService.saveDraft(formData, userId);
@@ -536,10 +442,9 @@ export const useRSBSAFormWithAPI = (userId) => {
           setLastSavedDraft(result.data);
           setApiResponse({ success: true, message: 'Draft saved successfully' });
           return true;
-        } else {
-          setApiResponse({ success: false, error: result.error });
-          return false;
         }
+        setApiResponse({ success: false, error: result.error });
+        return false;
       }
     } catch (error) {
       logHookError('saveDraft', error, { formData, userId });
@@ -605,10 +510,9 @@ export const useRSBSAFormWithAPI = (userId) => {
         }
         
         return true;
-      } else {
-        setApiResponse({ success: false, error: result.error });
-        return false;
       }
+      setApiResponse({ success: false, error: result.error });
+      return false;
     } catch (error) {
       logHookError('submitForm', error, { formData, userId });
       setApiResponse({ success: false, error: 'Failed to submit form' });

@@ -43,7 +43,7 @@ const validateField = (value, fieldName, rules) => {
   }
   
   if (rules.decimal && rules.decimal.includes(fieldName)) {
-    if (value && (isNaN(Number(value)) || Number(value) <= 0)) {
+            if (value && (Number.isNaN(Number(value)) || Number(value) <= 0)) {
       errors.push(`${fieldName} must be a positive number`);
     }
   }
@@ -61,7 +61,7 @@ const validateField = (value, fieldName, rules) => {
   }
   
   if (rules.phone && rules.phone.includes(fieldName)) {
-    if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) {
+            if (value && !/^[\d\s\-\+()]+$/.test(value)) {
       errors.push(`${fieldName} must be a valid phone number`);
     }
   }

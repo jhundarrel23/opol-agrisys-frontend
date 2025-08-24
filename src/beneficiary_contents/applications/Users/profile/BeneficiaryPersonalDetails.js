@@ -522,7 +522,7 @@ const BeneficiaryPersonalDetails = () => {
                   value={formData.first_name || 'From User Profile'}
                   InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
-                  disabled={true}
+                  disabled
                 />
               </Grid>
 
@@ -533,7 +533,7 @@ const BeneficiaryPersonalDetails = () => {
                   value={formData.last_name || 'From User Profile'}
                   InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
-                  disabled={true}
+                  disabled
                 />
               </Grid>
 
@@ -544,7 +544,7 @@ const BeneficiaryPersonalDetails = () => {
                   value={formData.email || 'From User Profile'}
                   InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
-                  disabled={true}
+                  disabled
                 />
               </Grid>
 
@@ -555,7 +555,7 @@ const BeneficiaryPersonalDetails = () => {
                   value={formData.phone_number || 'From User Profile'}
                   InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
-                  disabled={true}
+                  disabled
                 />
               </Grid>
 
@@ -902,7 +902,7 @@ const BeneficiaryPersonalDetails = () => {
                   value={formData.system_generated_rsbsa_number || formData.manual_rsbsa_number || 'Not assigned yet'}
                   InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
-                  disabled={true}
+                  disabled
                 />
               </Grid>
 
@@ -913,7 +913,7 @@ const BeneficiaryPersonalDetails = () => {
                   value={formData.rsbsa_verification_status ? formData.rsbsa_verification_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not verified'}
                   InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
-                  disabled={true}
+                  disabled
                 />
               </Grid>
 
@@ -949,10 +949,10 @@ const BeneficiaryPersonalDetails = () => {
                   label="Municipality"
                   value={formData.municipality}
                   onChange={(e) => handleFieldChange('municipality', e.target.value)}
-                  InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
                   disabled={!isEditing}
                   InputProps={{
+                    readOnly: true,
                     startAdornment: (
                       <InputAdornment position="start">
                         <LocationIcon color="action" />
@@ -968,10 +968,10 @@ const BeneficiaryPersonalDetails = () => {
                   label="Province"
                   value={formData.province}
                   onChange={(e) => handleFieldChange('province', e.target.value)}
-                  InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
                   disabled={!isEditing}
                   InputProps={{
+                    readOnly: true,
                     startAdornment: (
                       <InputAdornment position="start">
                         <LocationIcon color="action" />
@@ -987,10 +987,10 @@ const BeneficiaryPersonalDetails = () => {
                   label="Region"
                   value={formData.region}
                   onChange={(e) => handleFieldChange('region', e.target.value)}
-                  InputProps={{ readOnly: true }}
                   sx={{ backgroundColor: 'action.hover' }}
                   disabled={!isEditing}
                   InputProps={{
+                    readOnly: true,
                     startAdornment: (
                       <InputAdornment position="start">
                         <LocationIcon color="action" />
