@@ -101,7 +101,7 @@ const RSBSAForm = () => {
   const {
     formData,
     errors,
-
+    isLoading,
     isSubmitting,
     currentStep,
     totalSteps,
@@ -109,14 +109,14 @@ const RSBSAForm = () => {
     addFarmParcel,
     updateFarmParcel,
     removeFarmParcel,
-
+    updateLivelihoodDetails,
     nextStep,
     prevStep,
     goToStep,
     submitForm,
+    saveDraft,
     resetForm,
     formProgress,
-
     canSubmit
   } = useRSBSAForm();
 
@@ -160,13 +160,26 @@ const RSBSAForm = () => {
 
   // Handle form submission
   const handleSubmit = async () => {
-    const success = await submitForm();
-    if (success) {
-      setShowSuccess(true);
-      setShowError(false);
-    } else {
+    try {
+      console.log('Form submission started...');
+      console.log('Current form data:', formData);
+      console.log('Current errors:', errors);
+      
+      const success = await submitForm();
+      if (success) {
+        console.log('Form submitted successfully');
+        setShowSuccess(true);
+        setShowError(false);
+      } else {
+        console.log('Form submission failed');
+        setShowError(true);
+        setErrorMessage('Failed to submit form. Please check your input and try again.');
+        setShowSuccess(false);
+      }
+    } catch (error) {
+      console.error('Error in form submission handler:', error);
       setShowError(true);
-      setErrorMessage('Failed to submit form. Please try again.');
+      setErrorMessage(`Submission error: ${error.message}`);
       setShowSuccess(false);
     }
   };
@@ -182,10 +195,16 @@ const RSBSAForm = () => {
   };
 
   // Save draft
-  const handleSaveDraft = () => {
-    // Data is automatically saved to localStorage via the hook
-    // eslint-disable-next-line no-alert
-    alert('Draft saved successfully!');
+  const handleSaveDraft = async () => {
+    try {
+      await saveDraft();
+      // eslint-disable-next-line no-alert
+      alert('Draft saved successfully!');
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      // eslint-disable-next-line no-alert
+      alert('Failed to save draft. Please try again.');
+    }
   };
 
   // Render current step content
@@ -220,12 +239,8 @@ const RSBSAForm = () => {
       case 4:
         return (
           <LivelihoodDetailsSection
-            farmerDetails={formData.farmerDetails}
-            fisherfolkDetails={formData.fisherfolkDetails}
-            farmworkerDetails={formData.farmworkerDetails}
-            agriYouthDetails={formData.agriYouthDetails}
-            errors={errors}
-            updateField={updateField}
+            livelihoodDetails={formData.livelihoodDetails}
+            updateLivelihoodDetails={updateLivelihoodDetails}
           />
         );
       case 5:
@@ -360,7 +375,15 @@ const RSBSAForm = () => {
 
             {/* Form Content */}
             <Box sx={{ mt: 4 }}>
-              {renderStepContent()}
+              {isLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+                  <Typography variant="h6" color="text.secondary">
+                    Loading form data...
+                  </Typography>
+                </Box>
+              ) : (
+                renderStepContent()
+              )}
             </Box>
 
             {/* Action Buttons */}

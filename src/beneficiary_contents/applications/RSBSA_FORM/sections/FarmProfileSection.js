@@ -16,22 +16,29 @@ import {
   CircularProgress
 } from '@mui/material';
 import { Agriculture as AgricultureIcon } from '@mui/icons-material';
+import { rsbsaService } from '../../../api/rsbsaService';
 
 const FarmProfileSection = ({ formData, errors, updateField }) => {
   const [livelihoodCategories, setLivelihoodCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock livelihood categories based on database structure
-  // In a real application, this would be fetched from the API
+  // Fetch livelihood categories from API
   useEffect(() => {
     const fetchLivelihoodCategories = async () => {
       setLoading(true);
+      setError(null);
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('Fetching livelihood categories...');
+        const categories = await rsbsaService.getLivelihoodCategories();
+        console.log('Livelihood categories fetched:', categories);
+        setLivelihoodCategories(categories);
+      } catch (error) {
+        console.error('Error fetching livelihood categories:', error);
+        setError(error.message);
         
-        // Mock data based on typical RSBSA livelihood categories
-        const categories = [
+        // Fallback to mock data if API fails
+        const fallbackCategories = [
           {
             id: 1,
             livelihood_category_name: 'Rice Farmer',
@@ -177,7 +184,14 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
                     Loading livelihood categories...
                   </Typography>
                 </Box>
-              ) : (
+              ) : error ? (
+                <Alert severity="warning" sx={{ mb: 3 }}>
+                  <Typography variant="body2">
+                    Using fallback data due to connection issues. Some features may be limited.
+                  </Typography>
+                </Alert>
+              ) : null}
+              {!loading && (
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <FormControl fullWidth error={!!errors['farmProfile.livelihood_category_id']}>
@@ -219,6 +233,7 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
             </CardContent>
           </Card>
         </Grid>
+      )}
 
         {/* Information Card */}
         <Grid item xs={12}>
