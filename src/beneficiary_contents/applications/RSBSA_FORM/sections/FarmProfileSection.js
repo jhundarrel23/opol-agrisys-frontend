@@ -131,10 +131,7 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
           }
         ];
         
-        setLivelihoodCategories(categories);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching livelihood categories:', error);
+        setLivelihoodCategories(fallbackCategories);
       } finally {
         setLoading(false);
       }
@@ -144,7 +141,7 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
   }, []);
 
   const handleFieldChange = (field, value) => {
-    updateField(field, value);
+    updateField('farmProfile', field, value);
   };
 
   const selectedCategory = livelihoodCategories.find(
@@ -191,6 +188,7 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
                   </Typography>
                 </Alert>
               ) : null}
+              
               {!loading && (
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
@@ -233,7 +231,6 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
             </CardContent>
           </Card>
         </Grid>
-      )}
 
         {/* Information Card */}
         <Grid item xs={12}>
