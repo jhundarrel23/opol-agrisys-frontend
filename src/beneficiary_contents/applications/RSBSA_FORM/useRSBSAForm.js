@@ -41,6 +41,10 @@ export const useRSBSAForm = () => {
     beneficiaryProfile: {
       id: null,
       user_id: null,
+      fname: '',
+      mname: '',
+      lname: '',
+      extension_name: '',
       system_generated_rsbsa_number: null,
       manual_rsbsa_number: null,
       rsbsa_verification_status: 'not_verified',
@@ -180,7 +184,15 @@ export const useRSBSAForm = () => {
             setFormData(prevData => ({
               ...prevData,
               enrollment: { ...prevData.enrollment, user_id: user.id },
-              beneficiaryProfile: { ...prevData.beneficiaryProfile, user_id: user.id }
+              beneficiaryProfile: { 
+                ...prevData.beneficiaryProfile, 
+                user_id: user.id,
+                // Load user name from user object
+                fname: user.fname || '',
+                mname: user.mname || '',
+                lname: user.lname || '',
+                extension_name: user.extension_name || ''
+              }
             }));
 
             // Check if user already has beneficiary details
@@ -188,7 +200,15 @@ export const useRSBSAForm = () => {
             if (beneficiaryDetails) {
               setFormData(prevData => ({
                 ...prevData,
-                beneficiaryProfile: { ...prevData.beneficiaryProfile, ...beneficiaryDetails }
+                beneficiaryProfile: { 
+                  ...prevData.beneficiaryProfile, 
+                  ...beneficiaryDetails,
+                  // Preserve user name from user object
+                  fname: user.fname || beneficiaryDetails.fname || '',
+                  mname: user.mname || beneficiaryDetails.mname || '',
+                  lname: user.lname || beneficiaryDetails.lname || '',
+                  extension_name: user.extension_name || beneficiaryDetails.extension_name || ''
+                }
               }));
             }
 
@@ -378,22 +398,114 @@ export const useRSBSAForm = () => {
     }
   }, [formData]);
 
-  // Navigate to next step
+  // Step-by-step validation
+  const validateCurrentStep = useCallback(() => {
+    try {
+      const newErrors = {};
+      
+      switch (currentStep) {
+        case 1: // Beneficiary Profile
+          const { beneficiaryProfile } = formData;
+          if (!beneficiaryProfile.barangay?.trim()) {
+            newErrors['beneficiaryProfile.barangay'] = 'Barangay is required';
+          }
+          if (!beneficiaryProfile.contact_number?.trim()) {
+            newErrors['beneficiaryProfile.contact_number'] = 'Contact number is required';
+          }
+          if (!beneficiaryProfile.birth_date) {
+            newErrors['beneficiaryProfile.birth_date'] = 'Birth date is required';
+          }
+          if (!beneficiaryProfile.sex) {
+            newErrors['beneficiaryProfile.sex'] = 'Sex is required';
+          }
+          if (!beneficiaryProfile.civil_status) {
+            newErrors['beneficiaryProfile.civil_status'] = 'Civil status is required';
+          }
+          break;
+          
+        case 2: // Farm Profile
+          if (!formData.farmProfile.livelihood_category_id) {
+            newErrors['farmProfile.livelihood_category_id'] = 'Livelihood category is required';
+          }
+          break;
+          
+        case 3: // Farm Parcels
+          if (formData.farmParcels.length === 0) {
+            newErrors['farmParcels'] = 'At least one farm parcel is required';
+          } else {
+            formData.farmParcels.forEach((parcel, index) => {
+              if (!parcel.barangay?.trim()) {
+                newErrors[`farmParcels.${index}.barangay`] = 'Parcel barangay is required';
+              }
+              if (!parcel.tenure_type) {
+                newErrors[`farmParcels.${index}.tenure_type`] = 'Tenure type is required';
+              }
+              if (!parcel.farm_area || parcel.farm_area <= 0) {
+                newErrors[`farmParcels.${index}.farm_area`] = 'Farm area must be greater than 0';
+              }
+              if (!parcel.farm_type) {
+                newErrors[`farmParcels.${index}.farm_type`] = 'Farm type is required';
+              }
+            });
+          }
+          break;
+          
+        case 4: // Livelihood Details
+          // Validate that at least one livelihood category has some data
+          const hasLivelihoodData = Object.values(formData.livelihoodDetails).some(category => 
+            Object.values(category).some(value => 
+              value !== null && value !== '' && value !== false
+            )
+          );
+          if (!hasLivelihoodData) {
+            newErrors['livelihoodDetails'] = 'Please provide details for at least one livelihood category';
+          }
+          break;
+          
+        case 5: // Review
+          // Final validation before submission
+          if (!validateForm()) {
+            newErrors['general'] = 'Please complete all required fields before proceeding';
+          }
+          break;
+          
+        default:
+          break;
+      }
+      
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    } catch (error) {
+      console.error('Error in step validation:', error);
+      return false;
+    }
+  }, [formData, currentStep, validateForm]);
+
+  // Navigate to next step with validation
   const nextStep = useCallback(() => {
     try {
       if (currentStep < totalSteps) {
-        setCurrentStep(prev => prev + 1);
+        // Validate current step before proceeding
+        if (validateCurrentStep()) {
+          setCurrentStep(prev => prev + 1);
+          // Clear errors when moving to next step
+          setErrors({});
+        } else {
+          console.log('Step validation failed. Cannot proceed.');
+        }
       }
     } catch (error) {
       console.error('Error navigating to next step:', error);
     }
-  }, [currentStep, totalSteps]);
+  }, [currentStep, totalSteps, validateCurrentStep]);
 
   // Navigate to previous step
   const prevStep = useCallback(() => {
     try {
       if (currentStep > 1) {
         setCurrentStep(prev => prev - 1);
+        // Clear errors when going back
+        setErrors({});
       }
     } catch (error) {
       console.error('Error navigating to previous step:', error);
@@ -508,6 +620,10 @@ export const useRSBSAForm = () => {
         beneficiaryProfile: {
           id: null,
           user_id: null,
+          fname: '',
+          mname: '',
+          lname: '',
+          extension_name: '',
           system_generated_rsbsa_number: null,
           manual_rsbsa_number: null,
           rsbsa_verification_status: 'not_verified',
@@ -623,33 +739,27 @@ export const useRSBSAForm = () => {
     }
   }, [formData]);
 
+  // Return all necessary functions and state
   return {
-    // State
     formData,
     errors,
+    setErrors,
     isLoading,
     isSubmitting,
     currentStep,
     totalSteps,
-
-    // Actions
-    updateField,
-    addFarmParcel,
-    updateFarmParcel,
-    removeFarmParcel,
-    updateLivelihoodDetails,
-    validateForm,
     nextStep,
     prevStep,
     goToStep,
     submitForm,
     saveDraft,
     resetForm,
-
-    // Computed values
-    formProgress: getFormProgress(),
-    isValid: Object.keys(errors).length === 0,
-    canSubmit: Object.keys(errors).length === 0 && formData.farmParcels.length > 0
+    updateField,
+    addFarmParcel,
+    updateFarmParcel,
+    removeFarmParcel,
+    updateLivelihoodDetails,
+    validateCurrentStep
   };
 };
 
