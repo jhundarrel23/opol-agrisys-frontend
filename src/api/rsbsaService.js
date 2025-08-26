@@ -1,3 +1,4 @@
+/* eslint-disable no-else-return */
 import axios from 'axios';
 
 // Base API configuration

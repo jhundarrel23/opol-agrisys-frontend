@@ -16,14 +16,33 @@ import {
   CircularProgress
 } from '@mui/material';
 import { Agriculture as AgricultureIcon } from '@mui/icons-material';
-import { rsbsaService } from '../../../api/rsbsaService';
+import { rsbsaService } from '../../../../api/rsbsaService';
+
+// ✅ Fallback categories (constant outside to keep code clean)
+const FALLBACK_CATEGORIES = [
+  { id: 1, livelihood_category_name: 'Rice Farmer', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 2, livelihood_category_name: 'Corn Farmer', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 3, livelihood_category_name: 'Vegetable Farmer', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 4, livelihood_category_name: 'Fruit Farmer', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 5, livelihood_category_name: 'Livestock Raiser', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 6, livelihood_category_name: 'Poultry Raiser', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 7, livelihood_category_name: 'Fisherfolk', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 8, livelihood_category_name: 'Aquaculture', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 9, livelihood_category_name: 'Agricultural Worker/Farmworker', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 10, livelihood_category_name: 'Agri-Youth', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 11, livelihood_category_name: 'Coconut Farmer', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 12, livelihood_category_name: 'Sugarcane Farmer', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 13, livelihood_category_name: 'Coffee Farmer', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 14, livelihood_category_name: 'Cacao Farmer', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: 15, livelihood_category_name: 'Mixed Farming', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+];
 
 const FarmProfileSection = ({ formData, errors, updateField }) => {
   const [livelihoodCategories, setLivelihoodCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch livelihood categories from API
+  // ✅ Fetch livelihood categories from API
   useEffect(() => {
     const fetchLivelihoodCategories = async () => {
       setLoading(true);
@@ -36,102 +55,9 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
       } catch (error) {
         console.error('Error fetching livelihood categories:', error);
         setError(error.message);
-        
-        // Fallback to mock data if API fails
-        const fallbackCategories = [
-          {
-            id: 1,
-            livelihood_category_name: 'Rice Farmer',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            livelihood_category_name: 'Corn Farmer',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 3,
-            livelihood_category_name: 'Vegetable Farmer',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 4,
-            livelihood_category_name: 'Fruit Farmer',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 5,
-            livelihood_category_name: 'Livestock Raiser',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 6,
-            livelihood_category_name: 'Poultry Raiser',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 7,
-            livelihood_category_name: 'Fisherfolk',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 8,
-            livelihood_category_name: 'Aquaculture',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 9,
-            livelihood_category_name: 'Agricultural Worker/Farmworker',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 10,
-            livelihood_category_name: 'Agri-Youth',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 11,
-            livelihood_category_name: 'Coconut Farmer',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 12,
-            livelihood_category_name: 'Sugarcane Farmer',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 13,
-            livelihood_category_name: 'Coffee Farmer',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 14,
-            livelihood_category_name: 'Cacao Farmer',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: 15,
-            livelihood_category_name: 'Mixed Farming',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ];
-        
-        setLivelihoodCategories(fallbackCategories);
+
+        // ✅ Use fallback if API fails
+        setLivelihoodCategories(FALLBACK_CATEGORIES);
       } finally {
         setLoading(false);
       }
@@ -141,7 +67,7 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
   }, []);
 
   const handleFieldChange = (field, value) => {
-    updateField('farmProfile', field, value);
+    updateField(field, value);
   };
 
   const selectedCategory = livelihoodCategories.find(
@@ -188,7 +114,7 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
                   </Typography>
                 </Alert>
               ) : null}
-              
+
               {!loading && (
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
@@ -213,10 +139,7 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
 
                   {selectedCategory && (
                     <Grid item xs={12}>
-                      <Alert 
-                        severity="info" 
-                        sx={{ borderRadius: 2 }}
-                      >
+                      <Alert severity="info" sx={{ borderRadius: 2 }}>
                         <Typography variant="h6" gutterBottom>
                           Selected: {selectedCategory.livelihood_category_name}
                         </Typography>
@@ -240,7 +163,7 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
                 Important Notes
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              
+
               <Grid container spacing={2}>
                 <Grid item xs={12} md={4}>
                   <Typography variant="body2" color="text.secondary">
@@ -266,7 +189,7 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
   );
 };
 
-// Helper function to get description for each livelihood category
+// ✅ Helper function to get description for each livelihood category
 const getLivelihoodDescription = (categoryName) => {
   const descriptions = {
     'Rice Farmer': 'Engaged in rice production including land preparation, planting, care, and harvesting of rice crops.',

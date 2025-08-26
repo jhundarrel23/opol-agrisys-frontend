@@ -11,9 +11,7 @@ import {
   Switch,
   Tabs,
   Tab,
-  Alert,
-  Chip,
-  Paper
+  Alert
 } from '@mui/material';
 import {
   Work as WorkIcon,
@@ -38,29 +36,10 @@ const LivelihoodDetailsSection = ({
   };
 
   const TabPanel = ({ children, value, index }) => (
-    <div 
-      role="tabpanel"
-      hidden={value !== index}
-      id={`livelihood-tabpanel-${index}`}
-      aria-labelledby={`livelihood-tab-${index}`}
-    >
-      {value === index && (
-        <Box sx={{ p: 3, minHeight: '400px' }}>
-          {children}
-        </Box>
-      )}
+    <div hidden={value !== index}>
+      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
     </div>
   );
-
-  const getTabIcon = (index) => {
-    const icons = [<AgricultureIcon />, <WavesIcon />, <EngineeringIcon />, <SchoolIcon />];
-    return icons[index] || <WorkIcon />;
-  };
-
-  const getTabLabel = (index) => {
-    const labels = ['Farmer', 'Fisherfolk', 'Farmworker', 'Agri-Youth'];
-    return labels[index] || 'Unknown';
-  };
 
   return (
     <Box>
@@ -85,82 +64,75 @@ const LivelihoodDetailsSection = ({
       </Alert>
 
       {/* Main Card with Tabs */}
-      <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: 'background.paper' }}>
+      <Card
+        variant="outlined"
+        sx={{
+          borderRadius: 2,
+          width: "100%",
+          maxWidth: "100%",
+          overflow: "hidden"
+        }}
+      >
+        <CardContent sx={{ p: 0 }}>
           <Tabs
             value={currentTab}
             onChange={handleTabChange}
             variant="fullWidth"
-            aria-label="livelihood details tabs"
             sx={{
-              '& .MuiTab-root': {
-                minHeight: 72,
-                textTransform: 'none',
-                fontSize: '0.95rem',
-                fontWeight: 'medium',
-                '&.Mui-selected': {
-                  backgroundColor: 'action.selected',
-                  borderBottom: '2px solid',
-                  borderColor: 'primary.main'
+              borderBottom: 1,
+              borderColor: "divider",
+              minHeight: 70,
+              "& .MuiTab-root": {
+                minHeight: 70,
+                textTransform: "none",
+                fontSize: "0.95rem",
+                fontWeight: 500,
+                color: "text.secondary",
+                padding: "12px 8px",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                  color: "primary.main"
+                },
+                "& .MuiSvgIcon-root": {
+                  fontSize: "1.2rem",
+                  marginRight: "6px"
                 }
               },
-              '& .MuiTabs-indicator': {
-                display: 'none'
+              "& .MuiTab-root.Mui-selected": {
+                color: "white !important",
+                fontWeight: "bold",
+                backgroundColor: "primary.main",
+                borderRadius: "8px 8px 0 0",
+                "&:hover": {
+                  backgroundColor: "primary.dark"
+                }
+              },
+              "& .MuiTabs-indicator": {
+                display: "none"
               }
             }}
-          >
-            <Tab
-              icon={<AgricultureIcon />}
-              label="Farmer Details"
-              iconPosition="start"
-              id="livelihood-tab-0"
-              aria-controls="livelihood-tabpanel-0"
-            />
-            <Tab
-              icon={<WavesIcon />}
-              label="Fisherfolk Details"
-              iconPosition="start"
-              id="livelihood-tab-1"
-              aria-controls="livelihood-tabpanel-1"
-            />
-            <Tab
-              icon={<EngineeringIcon />}
-              label="Farmworker Details"
-              iconPosition="start"
-              id="livelihood-tab-2"
-              aria-controls="livelihood-tabpanel-2"
-            />
-            <Tab
-              icon={<SchoolIcon />}
-              label="Agri-Youth Details"
-              iconPosition="start"
-              id="livelihood-tab-3"
-              aria-controls="livelihood-tabpanel-3"
-            />
-          </Tabs>
-        </Box>
+                      >
+              <Tab icon={<AgricultureIcon />} label="Farmer" iconPosition="start" />
+              <Tab icon={<WavesIcon />} label="Fisherfolk" iconPosition="start" />
+              <Tab icon={<EngineeringIcon />} label="Farmworker" iconPosition="start" />
+              <Tab icon={<SchoolIcon />} label="Agri-Youth" iconPosition="start" />
+            </Tabs>
 
-        {/* Tab Content */}
-        <Box sx={{ position: 'relative' }}>
           {/* Farmer Details Tab */}
           <TabPanel value={currentTab} index={0}>
-            <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <AgricultureIcon sx={{ color: 'primary.main', mr: 1 }} />
-                <Typography variant="h6" color="primary" fontWeight="bold">
-                  Farming Activities
-                </Typography>
-              </Box>
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom color="primary">
+                Farming Activities
+              </Typography>
               <Divider sx={{ mb: 3 }} />
 
-              <Grid container spacing={3}>
+              <Grid container spacing={2} alignItems="center">
                 {/* Crop Production */}
                 <Grid item xs={12}>
-                  <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
-                    <Typography variant="subtitle1" gutterBottom fontWeight="medium" color="primary">
-                      Crop Production
-                    </Typography>
-                  </Paper>
+                  <Typography variant="subtitle1" gutterBottom fontWeight="medium">
+                    Crop Production
+                  </Typography>
                 </Grid>
 
                 <Grid item xs={12} md={4}>
@@ -172,16 +144,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Rice Production" 
-                          size="small" 
-                          color={livelihoodDetails.farmer?.is_rice ? "success" : "default"}
-                          variant={livelihoodDetails.farmer?.is_rice ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Rice Production"
                   />
                 </Grid>
 
@@ -194,16 +157,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Corn Production" 
-                          size="small" 
-                          color={livelihoodDetails.farmer?.is_corn ? "success" : "default"}
-                          variant={livelihoodDetails.farmer?.is_corn ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Corn Production"
                   />
                 </Grid>
 
@@ -216,16 +170,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Other Crops" 
-                          size="small" 
-                          color={livelihoodDetails.farmer?.is_other_crops ? "success" : "default"}
-                          variant={livelihoodDetails.farmer?.is_other_crops ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Other Crops"
                   />
                 </Grid>
 
@@ -235,23 +180,19 @@ const LivelihoodDetailsSection = ({
                       fullWidth
                       label="Other Crops Description"
                       multiline
-                      rows={3}
+                      rows={2}
                       value={livelihoodDetails.farmer?.other_crops_description || ''}
                       onChange={(e) => handleFieldChange('farmer', 'other_crops_description', e.target.value)}
                       placeholder="Specify other crops you produce (e.g., vegetables, fruits, root crops)"
-                      variant="outlined"
-                      sx={{ mt: 1 }}
                     />
                   </Grid>
                 )}
 
                 {/* Livestock and Poultry */}
                 <Grid item xs={12}>
-                  <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 2, mt: 2 }}>
-                    <Typography variant="subtitle1" gutterBottom fontWeight="medium" color="primary">
-                      Livestock and Poultry
-                    </Typography>
-                  </Paper>
+                  <Typography variant="subtitle1" gutterBottom fontWeight="medium" sx={{ mt: 2 }}>
+                    Livestock and Poultry
+                  </Typography>
                 </Grid>
 
                 <Grid item xs={12} md={6}>
@@ -263,16 +204,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Livestock Raising" 
-                          size="small" 
-                          color={livelihoodDetails.farmer?.is_livestock ? "success" : "default"}
-                          variant={livelihoodDetails.farmer?.is_livestock ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Livestock Raising"
                   />
                 </Grid>
 
@@ -285,47 +217,34 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Poultry Raising" 
-                          size="small" 
-                          color={livelihoodDetails.farmer?.is_poultry ? "success" : "default"}
-                          variant={livelihoodDetails.farmer?.is_poultry ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Poultry Raising"
                   />
                 </Grid>
 
                 {livelihoodDetails.farmer?.is_livestock && (
-                  <Grid item xs={12}>
+                  <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       label="Livestock Description"
                       multiline
-                      rows={3}
+                      rows={2}
                       value={livelihoodDetails.farmer?.livestock_description || ''}
                       onChange={(e) => handleFieldChange('farmer', 'livestock_description', e.target.value)}
-                      placeholder="Specify types of livestock you raise (e.g., cattle, swine, goats, sheep)"
-                      variant="outlined"
-                      sx={{ mt: 1 }}
+                      placeholder="Specify livestock types (e.g., cattle, carabao, goats, swine)"
                     />
                   </Grid>
                 )}
 
                 {livelihoodDetails.farmer?.is_poultry && (
-                  <Grid item xs={12}>
+                  <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       label="Poultry Description"
                       multiline
-                      rows={3}
+                      rows={2}
                       value={livelihoodDetails.farmer?.poultry_description || ''}
                       onChange={(e) => handleFieldChange('farmer', 'poultry_description', e.target.value)}
-                      placeholder="Specify types of poultry you raise (e.g., chickens, ducks, turkeys)"
-                      variant="outlined"
-                      sx={{ mt: 1 }}
+                      placeholder="Specify poultry types (e.g., chickens, ducks, geese, turkeys)"
                     />
                   </Grid>
                 )}
@@ -335,24 +254,13 @@ const LivelihoodDetailsSection = ({
 
           {/* Fisherfolk Details Tab */}
           <TabPanel value={currentTab} index={1}>
-            <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <WavesIcon sx={{ color: 'primary.main', mr: 1 }} />
-                <Typography variant="h6" color="primary" fontWeight="bold">
-                  Fishing Activities
-                </Typography>
-              </Box>
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom color="primary">
+                Fishing Activities
+              </Typography>
               <Divider sx={{ mb: 3 }} />
 
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
-                    <Typography variant="subtitle1" gutterBottom fontWeight="medium" color="primary">
-                      Fishing Methods
-                    </Typography>
-                  </Paper>
-                </Grid>
-
+              <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} md={4}>
                   <FormControlLabel
                     control={
@@ -362,16 +270,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Fish Capture" 
-                          size="small" 
-                          color={livelihoodDetails.fisherfolk?.is_fish_capture ? "success" : "default"}
-                          variant={livelihoodDetails.fisherfolk?.is_fish_capture ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Fish Capture"
                   />
                 </Grid>
 
@@ -384,16 +283,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Aquaculture" 
-                          size="small" 
-                          color={livelihoodDetails.fisherfolk?.is_aquaculture ? "success" : "default"}
-                          variant={livelihoodDetails.fisherfolk?.is_aquaculture ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Aquaculture"
                   />
                 </Grid>
 
@@ -406,30 +296,19 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Fish Processing" 
-                          size="small" 
-                          color={livelihoodDetails.fisherfolk?.is_fish_processing ? "success" : "default"}
-                          variant={livelihoodDetails.fisherfolk?.is_fish_processing ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Fish Processing"
                   />
                 </Grid>
 
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Other Fishing Activities"
+                    label="Other Fishing Activities Description"
                     multiline
                     rows={3}
                     value={livelihoodDetails.fisherfolk?.other_fishing_description || ''}
                     onChange={(e) => handleFieldChange('fisherfolk', 'other_fishing_description', e.target.value)}
-                    placeholder="Describe any other fishing-related activities you're involved in"
-                    variant="outlined"
-                    sx={{ mt: 1 }}
+                    placeholder="Describe other fishing-related activities or specify details about your fishing operations"
                   />
                 </Grid>
               </Grid>
@@ -438,24 +317,13 @@ const LivelihoodDetailsSection = ({
 
           {/* Farmworker Details Tab */}
           <TabPanel value={currentTab} index={2}>
-            <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <EngineeringIcon sx={{ color: 'primary.main', mr: 1 }} />
-                <Typography variant="h6" color="primary" fontWeight="bold">
-                  Farm Work Activities
-                </Typography>
-              </Box>
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom color="primary">
+                Farm Work Activities
+              </Typography>
               <Divider sx={{ mb: 3 }} />
 
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
-                    <Typography variant="subtitle1" gutterBottom fontWeight="medium" color="primary">
-                      Work Categories
-                    </Typography>
-                  </Paper>
-                </Grid>
-
+              <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} md={4}>
                   <FormControlLabel
                     control={
@@ -465,16 +333,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Land Preparation" 
-                          size="small" 
-                          color={livelihoodDetails.farmworker?.is_land_preparation ? "success" : "default"}
-                          variant={livelihoodDetails.farmworker?.is_land_preparation ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Land Preparation"
                   />
                 </Grid>
 
@@ -487,16 +346,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Cultivation" 
-                          size="small" 
-                          color={livelihoodDetails.farmworker?.is_cultivation ? "success" : "default"}
-                          variant={livelihoodDetails.farmworker?.is_cultivation ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Cultivation"
                   />
                 </Grid>
 
@@ -509,16 +359,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Harvesting" 
-                          size="small" 
-                          color={livelihoodDetails.farmworker?.is_harvesting ? "success" : "default"}
-                          variant={livelihoodDetails.farmworker?.is_harvesting ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Harvesting"
                   />
                 </Grid>
 
@@ -530,9 +371,7 @@ const LivelihoodDetailsSection = ({
                     rows={3}
                     value={livelihoodDetails.farmworker?.other_work_description || ''}
                     onChange={(e) => handleFieldChange('farmworker', 'other_work_description', e.target.value)}
-                    placeholder="Describe any other farm work activities you perform"
-                    variant="outlined"
-                    sx={{ mt: 1 }}
+                    placeholder="Describe other farm work activities you perform (e.g., irrigation, pest control, farm maintenance)"
                   />
                 </Grid>
               </Grid>
@@ -541,24 +380,13 @@ const LivelihoodDetailsSection = ({
 
           {/* Agri-Youth Details Tab */}
           <TabPanel value={currentTab} index={3}>
-            <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <SchoolIcon sx={{ color: 'primary.main', mr: 1 }} />
-                <Typography variant="h6" color="primary" fontWeight="bold">
-                  Agricultural Youth Involvement
-                </Typography>
-              </Box>
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom color="primary">
+                Agricultural Youth Involvement
+              </Typography>
               <Divider sx={{ mb: 3 }} />
 
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Paper elevation={0} sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
-                    <Typography variant="subtitle1" gutterBottom fontWeight="medium" color="primary">
-                      Youth Category & Education
-                    </Typography>
-                  </Paper>
-                </Grid>
-
+              <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} md={6}>
                   <FormControlLabel
                     control={
@@ -568,16 +396,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Agricultural Youth" 
-                          size="small" 
-                          color={livelihoodDetails.agriYouth?.is_agri_youth ? "success" : "default"}
-                          variant={livelihoodDetails.agriYouth?.is_agri_youth ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Agricultural Youth (15-30 years old)"
                   />
                 </Grid>
 
@@ -590,16 +409,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Farming Household Member" 
-                          size="small" 
-                          color={livelihoodDetails.agriYouth?.is_part_of_farming_household ? "success" : "default"}
-                          variant={livelihoodDetails.agriYouth?.is_part_of_farming_household ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Part of Farming Household"
                   />
                 </Grid>
 
@@ -612,16 +422,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Formal Agricultural Course" 
-                          size="small" 
-                          color={livelihoodDetails.agriYouth?.is_formal_agri_course ? "success" : "default"}
-                          variant={livelihoodDetails.agriYouth?.is_formal_agri_course ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Formal Agricultural Course"
                   />
                 </Grid>
 
@@ -634,20 +435,11 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Non-Formal Agricultural Course" 
-                          size="small" 
-                          color={livelihoodDetails.agriYouth?.is_nonformal_agri_course ? "success" : "default"}
-                          variant={livelihoodDetails.agriYouth?.is_nonformal_agri_course ? "filled" : "outlined"}
-                        />
-                      </Box>
-                    }
+                    label="Non-formal Agricultural Course"
                   />
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12}>
                   <FormControlLabel
                     control={
                       <Switch
@@ -656,16 +448,7 @@ const LivelihoodDetailsSection = ({
                         color="primary"
                       />
                     }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Chip 
-                          label="Agricultural Program Participant" 
-                          size="small" 
-                          color={livelihoodDetails.agriYouth?.is_agri_program_participant ? "success" : "default"}
-                          variant={livelihoodDetails.agriYouth?.is_agri_program_participant ? "filled" : "default"}
-                        />
-                      </Box>
-                    }
+                    label="Agricultural Program Participant"
                   />
                 </Grid>
 
@@ -677,15 +460,36 @@ const LivelihoodDetailsSection = ({
                     rows={3}
                     value={livelihoodDetails.agriYouth?.other_involvement_description || ''}
                     onChange={(e) => handleFieldChange('agriYouth', 'other_involvement_description', e.target.value)}
-                    placeholder="Describe any other agricultural youth involvement or activities"
-                    variant="outlined"
-                    sx={{ mt: 1 }}
+                    placeholder="Describe other agricultural involvement, programs participated in, or future plans in agriculture"
                   />
                 </Grid>
               </Grid>
             </Box>
           </TabPanel>
-        </Box>
+        </CardContent>
+      </Card>
+
+      {/* Information Card */}
+      <Card variant="outlined" sx={{ mt: 3, borderRadius: 2, backgroundColor: 'background.default' }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom color="primary">
+            Section Guidelines
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Typography variant="body2" color="text.secondary">
+                <strong>Multiple Activities:</strong> You can select multiple activities within each category if applicable to your situation.
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="body2" color="text.secondary">
+                <strong>Detailed Descriptions:</strong> Provide specific details in description fields to help with program matching.
+              </Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
       </Card>
     </Box>
   );

@@ -3,61 +3,28 @@ import {
   Box,
   Typography,
   Card,
-  Tooltip,
   Avatar,
   CardMedia,
-  Button,
-  IconButton,
-  styled
+  styled,
+  Chip
 } from '@mui/material';
 
-import ArrowBackTwoToneIcon from '@mui/icons-material/ArrowBackTwoTone';
-import ArrowForwardTwoToneIcon from '@mui/icons-material/ArrowForwardTwoTone';
-import UploadTwoToneIcon from '@mui/icons-material/UploadTwoTone';
-import MoreHorizTwoToneIcon from '@mui/icons-material/MoreHorizTwoTone';
 import AgricultureIcon from '@mui/icons-material/Agriculture';
 import VerifiedIcon from '@mui/icons-material/Verified';
-
-const Input = styled('input')({
-  display: 'none'
-});
+import PendingIcon from '@mui/icons-material/Pending';
 
 const AvatarWrapper = styled(Card)(
   ({ theme }) => `
-
     position: relative;
     overflow: visible;
     display: inline-block;
-    margin-top: -${theme.spacing(9)};
-    margin-left: ${theme.spacing(2)};
+    margin-top: -${theme.spacing(8)};
+    margin-left: ${theme.spacing(3)};
 
     .MuiAvatar-root {
-      width: ${theme.spacing(16)};
-      height: ${theme.spacing(16)};
-    }
-`
-);
-
-const ButtonUploadWrapper = styled(Box)(
-  ({ theme }) => `
-    position: absolute;
-    width: ${theme.spacing(4)};
-    height: ${theme.spacing(4)};
-    bottom: -${theme.spacing(1)};
-    right: -${theme.spacing(1)};
-
-    .MuiIconButton-root {
-      border-radius: 100%;
-      background: ${theme.colors.primary.main};
-      color: ${theme.palette.primary.contrastText};
-      box-shadow: ${theme.colors.shadows.primary};
-      width: ${theme.spacing(4)};
-      height: ${theme.spacing(4)};
-      padding: 0;
-  
-      &:hover {
-        background: ${theme.colors.primary.dark};
-      }
+      width: ${theme.spacing(14)};
+      height: ${theme.spacing(14)};
+      border: 4px solid ${theme.palette.background.paper};
     }
 `
 );
@@ -65,110 +32,77 @@ const ButtonUploadWrapper = styled(Box)(
 const CardCover = styled(Card)(
   ({ theme }) => `
     position: relative;
+    border-radius: ${theme.spacing(2)};
 
     .MuiCardMedia-root {
-      height: ${theme.spacing(26)};
+      height: ${theme.spacing(20)};
+      background: linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%);
     }
 `
 );
 
-const CardCoverAction = styled(Box)(
-  ({ theme }) => `
-    position: absolute;
-    right: ${theme.spacing(2)};
-    bottom: ${theme.spacing(2)};
-`
-);
-
 const ProfileCover = ({ user }) => {
+  const isVerified = user.followers === 'Verified';
+  
   return (
     <>
+      {/* Header Section */}
       <Box display="flex" mb={3}>
-        <Tooltip arrow placement="top" title="Go back">
-          <IconButton color="primary" sx={{ p: 2, mr: 2 }}>
-            <ArrowBackTwoToneIcon />
-          </IconButton>
-        </Tooltip>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
             <AgricultureIcon sx={{ fontSize: 32 }} />
           </Avatar>
           <Box>
-            <Typography variant="h3" component="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 'bold' }}>
               RSBSA Beneficiary Profile
-              {user.followers === 'Verified' && (
+              {isVerified && (
                 <VerifiedIcon color="success" sx={{ fontSize: 28 }} />
               )}
             </Typography>
-            <Typography variant="subtitle2">
+            <Typography variant="subtitle1" color="text.secondary">
               Registry System for Basic Sectors in Agriculture
             </Typography>
           </Box>
         </Box>
       </Box>
-      <CardCover>
+
+      {/* Cover Image */}
+      <CardCover elevation={3}>
         <CardMedia image={user.coverImg} />
-        <CardCoverAction>
-          <Input accept="image/*" id="change-cover" multiple type="file" />
-          <label htmlFor="change-cover">
-            <Button
-              startIcon={<UploadTwoToneIcon />}
-              variant="contained"
-              component="span"
-            >
-              Change cover
-            </Button>
-          </label>
-        </CardCoverAction>
       </CardCover>
-      <AvatarWrapper>
+
+      {/* Profile Avatar */}
+      <AvatarWrapper elevation={2}>
         <Avatar variant="rounded" alt={user.name} src={user.avatar} />
-        <ButtonUploadWrapper>
-          <Input
-            accept="image/*"
-            id="icon-button-file"
-            name="icon-button-file"
-            type="file"
-          />
-          <label htmlFor="icon-button-file">
-            <IconButton component="span" color="primary">
-              <UploadTwoToneIcon />
-            </IconButton>
-          </label>
-        </ButtonUploadWrapper>
       </AvatarWrapper>
-      <Box py={2} pl={2} mb={3}>
-        <Typography gutterBottom variant="h4">
-          {user.name}
-        </Typography>
-        <Typography variant="subtitle2">{user.description}</Typography>
-        <Typography sx={{ py: 2 }} variant="subtitle2" color="text.primary">
-          {user.jobtitle} | {user.location} | Status: {user.followers}
-        </Typography>
-        <Box
-          display={{ xs: 'block', md: 'flex' }}
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Box>
-            <Button size="small" variant="contained">
-              Follow
-            </Button>
-            <Button size="small" sx={{ mx: 1 }} variant="outlined">
-              View website
-            </Button>
-            <IconButton color="primary" sx={{ p: 0.5 }}>
-              <MoreHorizTwoToneIcon />
-            </IconButton>
-          </Box>
-          <Button
-            sx={{ mt: { xs: 2, md: 0 } }}
-            size="small"
-            variant="text"
-            endIcon={<ArrowForwardTwoToneIcon />}
-          >
-            See all {user.followers} connections
-          </Button>
+
+      {/* Profile Information */}
+      <Box py={3} pl={3} mb={2}>
+        {/* User Description */}
+        <Box mb={3}>
+          <Typography variant="body1" sx={{ fontSize: '16px', lineHeight: 1.6 }}>
+            {user.description}
+          </Typography>
+        </Box>
+
+        {/* Status and Location */}
+        <Box display="flex" flexWrap="wrap" gap={1} alignItems="center" mb={2}>
+          <Chip
+            icon={isVerified ? <VerifiedIcon /> : <PendingIcon />}
+            label={user.jobtitle}
+            color={isVerified ? 'success' : 'warning'}
+            variant="filled"
+          />
+          <Chip
+            label={user.location}
+            variant="outlined"
+            color="primary"
+          />
+          <Chip
+            label={`Status: ${user.followers}`}
+            variant="outlined"
+            color={isVerified ? 'success' : 'default'}
+          />
         </Box>
       </Box>
     </>
@@ -176,7 +110,6 @@ const ProfileCover = ({ user }) => {
 };
 
 ProfileCover.propTypes = {
-  // @ts-ignore
   user: PropTypes.object.isRequired
 };
 

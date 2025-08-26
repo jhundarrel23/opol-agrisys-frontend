@@ -49,6 +49,17 @@ const BeneficiaryProfileSection = ({ formData, errors, updateField }) => {
     { value: 'female', label: 'Female' }
   ];
 
+  // Name extension options (common Filipino name suffixes)
+  const nameExtensionOptions = [
+    { value: '', label: 'None' },
+    { value: 'Jr.', label: 'Jr.' },
+    { value: 'Sr.', label: 'Sr.' },
+    { value: 'II', label: 'II' },
+    { value: 'III', label: 'III' },
+    { value: 'IV', label: 'IV' },
+    { value: 'V', label: 'V' }
+  ];
+
   const barangayOptions = [
     'Bagocboc', 'Barra', 'Bonbon', 'Buruanga', 'Cabadiangan', 'Camaman-an',
     'Gotokan', 'Igpit', 'Limbaybay', 'Lower Olave', 'Lumbia', 'Malitbog',
@@ -76,6 +87,74 @@ const BeneficiaryProfileSection = ({ formData, errors, updateField }) => {
       </Box>
 
       <Grid container spacing={3}>
+        {/* Full Name Card */}
+        <Grid item xs={12}>
+          <Card variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom color="primary" sx={{ display: 'flex', alignItems: 'center' }}>
+                Full Name
+                <Chip label="Required" color="error" size="small" sx={{ ml: 2 }} />
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
+
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="First Name *"
+                    value={formData.first_name || ''}
+                    onChange={(e) => handleFieldChange('first_name', e.target.value)}
+                    placeholder="Enter your first name"
+                    error={!!errors['beneficiaryProfile.first_name']}
+                    helperText={errors['beneficiaryProfile.first_name'] || 'As written in your ID'}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Middle Name"
+                    value={formData.middle_name || ''}
+                    onChange={(e) => handleFieldChange('middle_name', e.target.value)}
+                    placeholder="Enter your middle name"
+                    helperText="Optional: Include if shown in your ID"
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Last Name *"
+                    value={formData.last_name || ''}
+                    onChange={(e) => handleFieldChange('last_name', e.target.value)}
+                    placeholder="Enter your last name"
+                    error={!!errors['beneficiaryProfile.last_name']}
+                    helperText={errors['beneficiaryProfile.last_name'] || 'Your family name'}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Name Extension</InputLabel>
+                    <Select
+                      value={formData.name_extension || ''}
+                      onChange={(e) => handleFieldChange('name_extension', e.target.value)}
+                      label="Name Extension"
+                    >
+                      {nameExtensionOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    <FormHelperText>Optional: Jr., Sr., II, III, etc.</FormHelperText>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+
         {/* Basic Information Card */}
         <Grid item xs={12}>
           <Card variant="outlined" sx={{ borderRadius: 2 }}>
