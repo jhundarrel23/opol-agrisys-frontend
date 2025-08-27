@@ -159,7 +159,7 @@ export const useRSBSAForm = () => {
 
   // Form step management
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6;
+  const totalSteps = 5;
 
   // Load form data from localStorage and API on component mount
   useEffect(() => {

@@ -23,7 +23,6 @@ import {
   Person as PersonIcon,
   Agriculture as AgricultureIcon,
   Landscape as LandscapeIcon,
-  Work as WorkIcon,
   Assessment as AssessmentIcon,
   Send as SendIcon,
   ArrowBack as ArrowBackIcon,
@@ -36,11 +35,10 @@ import { styled } from '@mui/material/styles';
 // Import the custom hook
 import { useRSBSAForm } from './useRSBSAForm';
 
-// Import form sections (we'll create these)
+// Import form sections
 import BeneficiaryProfileSection from './sections/BeneficiaryProfileSection';
 import FarmProfileSection from './sections/FarmProfileSection';
 import FarmParcelsSection from './sections/FarmParcelsSection';
-import LivelihoodDetailsSection from './sections/LivelihoodDetailsSection';
 import ReviewSection from './sections/ReviewSection';
 import SubmissionSection from './sections/SubmissionSection';
 
@@ -132,19 +130,14 @@ const RSBSAForm = () => {
       description: 'Basic beneficiary details'
     },
     {
-      label: 'Farm Profile',
+      label: 'Farm Profile & Livelihood',
       icon: <AgricultureIcon />,
-      description: 'Farm and livelihood information'
+      description: 'Complete farm and livelihood information'
     },
     {
       label: 'Farm Parcels',
       icon: <LandscapeIcon />,
       description: 'Land ownership details'
-    },
-    {
-      label: 'Livelihood Details',
-      icon: <WorkIcon />,
-      description: 'Specific agricultural activities'
     },
     {
       label: 'Review',
@@ -205,6 +198,11 @@ const RSBSAForm = () => {
             formData={formData.farmProfile}
             errors={errors}
             updateField={(field, value) => updateField('farmProfile', field, value)}
+            // Pass livelihood details data to the merged section
+            farmerDetails={formData.farmerDetails}
+            fisherfolkDetails={formData.fisherfolkDetails}
+            farmworkerDetails={formData.farmworkerDetails}
+            agriYouthDetails={formData.agriYouthDetails}
           />
         );
       case 3:
@@ -219,24 +217,13 @@ const RSBSAForm = () => {
         );
       case 4:
         return (
-          <LivelihoodDetailsSection
-            farmerDetails={formData.farmerDetails}
-            fisherfolkDetails={formData.fisherfolkDetails}
-            farmworkerDetails={formData.farmworkerDetails}
-            agriYouthDetails={formData.agriYouthDetails}
-            errors={errors}
-            updateField={updateField}
-          />
-        );
-      case 5:
-        return (
           <ReviewSection
             formData={formData}
             errors={errors}
             onEdit={goToStep}
           />
         );
-      case 6:
+      case 5:
         return (
           <SubmissionSection
             formData={formData}
