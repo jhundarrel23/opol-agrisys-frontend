@@ -3,6 +3,14 @@
 ## Overview
 This document outlines the fixes and improvements made to the RSBSA (Registry System for Basic Sectors in Agriculture) form system.
 
+## Latest Update - Form Structure Optimization
+
+### Major Structural Changes (Latest)
+- **Merged Livelihood Section**: The separate "Livelihood Details" section has been merged into the "Farm Profile" section for better user experience
+- **Reduced Steps**: Form now has 5 steps instead of 6 (Personal Info → Farm Profile & Livelihood → Farm Parcels → Review → Submit)
+- **Enhanced UI**: Improved tabbed interface within the Farm Profile section for different livelihood activities
+- **Better Organization**: All agricultural activities are now organized in one comprehensive section with accordion and tab layouts
+
 ## Issues Fixed
 
 ### 1. Data Structure Mismatch
@@ -23,14 +31,15 @@ This document outlines the fixes and improvements made to the RSBSA (Registry Sy
   - Livelihood details
   - Reference data (categories, commodities, sectors)
 
-### 3. UI Layout Issues in Livelihood Details
-- **Problem**: Overlay issues and poor tab management
+### 3. UI Layout Issues and Form Structure
+- **Problem**: Overlay issues, poor tab management, and separate livelihood section causing confusion
 - **Solution**: 
+  - **Merged livelihood section into farm profile** for streamlined user experience
   - Fixed tab panel rendering with proper `role` and `aria-` attributes
-  - Added minimum height to prevent content jumping
-  - Improved tab styling with better visual feedback
-  - Added proper spacing and Paper components for better organization
-  - Enhanced switch labels with Chip components for better UX
+  - Added accordion layout for better organization of farming activities
+  - Improved tab styling with better visual feedback and icons
+  - Enhanced switch labels with descriptive text and better UX
+  - **Reduced form from 6 steps to 5 steps** for faster completion
 
 ### 4. Form Validation and Error Handling
 - **Problem**: Limited error handling and validation
@@ -60,11 +69,13 @@ This document outlines the fixes and improvements made to the RSBSA (Registry Sy
 - API-based draft persistence
 - Better draft loading and error handling
 
-### 3. Enhanced Livelihood Details
-- Better organized tab structure
-- Visual feedback with Chip components
-- Improved form field organization
-- Better responsive design
+### 3. Enhanced Farm Profile & Livelihood Integration
+- **Merged livelihood details into farm profile section**
+- Tabbed interface for different agricultural activities (Farming, Fishing, Farm Work, Agri-Youth)
+- Accordion layout for crop production and livestock sections
+- Visual feedback with descriptive labels and icons
+- Improved form field organization and responsive design
+- **Streamlined workflow with fewer steps**
 
 ### 4. Comprehensive Error Handling
 - Try-catch blocks in all async operations
@@ -95,7 +106,8 @@ This document outlines the fixes and improvements made to the RSBSA (Registry Sy
 ## Usage Instructions
 
 ### 1. Form Navigation
-- Use the stepper to navigate between sections
+- Use the stepper to navigate between 5 streamlined sections
+- **New structure**: Personal Info → Farm Profile & Livelihood → Farm Parcels → Review → Submit
 - Each step validates required fields before proceeding
 - Progress is automatically saved as you complete sections
 
@@ -104,10 +116,15 @@ This document outlines the fixes and improvements made to the RSBSA (Registry Sy
 - Use switches for boolean values (yes/no questions)
 - Provide detailed descriptions where applicable
 
-### 3. Livelihood Details
-- Select the appropriate tab for your primary livelihood
-- You can fill multiple tabs if applicable
-- Use description fields to provide specific details
+### 3. Farm Profile & Livelihood Details (New Merged Section)
+- Select your primary livelihood category from the dropdown
+- Use the tabbed interface to provide detailed information:
+  - **Farming Activities**: Crop production, livestock, and poultry
+  - **Fishing Activities**: Fish capture, aquaculture, processing
+  - **Farm Work**: Land preparation, cultivation, harvesting
+  - **Agri-Youth**: Youth involvement in agriculture
+- Use accordion sections within tabs for better organization
+- Fill multiple activity types if applicable to your situation
 
 ### 4. Form Submission
 - Review all information before submitting

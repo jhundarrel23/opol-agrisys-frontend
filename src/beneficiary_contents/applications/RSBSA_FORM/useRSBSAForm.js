@@ -452,19 +452,7 @@ export const useRSBSAForm = () => {
           }
           break;
           
-        case 4: // Livelihood Details
-          // Validate that at least one livelihood category has some data
-          const hasLivelihoodData = Object.values(formData.livelihoodDetails).some(category => 
-            Object.values(category).some(value => 
-              value !== null && value !== '' && value !== false
-            )
-          );
-          if (!hasLivelihoodData) {
-            newErrors['livelihoodDetails'] = 'Please provide details for at least one livelihood category';
-          }
-          break;
-          
-        case 5: // Review
+        case 4: // Review
           // Final validation before submission
           if (!validateForm()) {
             newErrors['general'] = 'Please complete all required fields before proceeding';
