@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Grid,
+  TextField,
   FormControl,
   InputLabel,
   Select,
@@ -13,9 +14,19 @@ import {
   FormHelperText,
   Chip,
   Alert,
-  CircularProgress
+  CircularProgress,
+  FormControlLabel,
+  Switch,
+  Tabs,
+  Tab
 } from '@mui/material';
-import { Agriculture as AgricultureIcon } from '@mui/icons-material';
+import {
+  Agriculture as AgricultureIcon,
+  Work as WorkIcon,
+  Waves as WavesIcon,
+  Engineering as EngineeringIcon,
+  School as SchoolIcon
+} from '@mui/icons-material';
 import { rsbsaService } from '../../../../api/rsbsaService';
 
 // ✅ Fallback categories (constant outside to keep code clean)
@@ -37,10 +48,11 @@ const FALLBACK_CATEGORIES = [
   { id: 15, livelihood_category_name: 'Mixed Farming', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
 ];
 
-const FarmProfileSection = ({ formData, errors, updateField }) => {
+const FarmProfileSection = ({ formData, errors, updateField, livelihoodDetails, updateLivelihoodDetails }) => {
   const [livelihoodCategories, setLivelihoodCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentTab, setCurrentTab] = useState(0);
 
   // ✅ Fetch livelihood categories from API
   useEffect(() => {
@@ -69,6 +81,22 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
   const handleFieldChange = (field, value) => {
     updateField(field, value);
   };
+
+  const handleLivelihoodFieldChange = (category, field, value) => {
+    if (typeof updateLivelihoodDetails === 'function') {
+      updateLivelihoodDetails(category, field, value);
+    }
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
+  };
+
+  const TabPanel = ({ children, value, index }) => (
+    <div hidden={value !== index}>
+      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+    </div>
+  );
 
   const selectedCategory = livelihoodCategories.find(
     category => category.id === formData.livelihood_category_id
@@ -183,6 +211,379 @@ const FarmProfileSection = ({ formData, errors, updateField }) => {
               </Grid>
             </CardContent>
           </Card>
+        </Grid>
+
+        {/* Livelihood Details (moved here from separate section) */}
+        <Grid item xs={12}>
+          <Box sx={{ mt: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <WorkIcon sx={{ fontSize: 28, color: 'primary.main', mr: 1.5 }} />
+              <Typography variant="h5" component="h3" fontWeight="bold" color="primary">
+                Livelihood Details
+              </Typography>
+            </Box>
+
+            <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
+              <Typography variant="body2">
+                Complete the sections that apply to your livelihood category. You can fill multiple sections if involved in various activities.
+              </Typography>
+            </Alert>
+
+            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+              <CardContent sx={{ p: 0 }}>
+                <Tabs
+                  value={currentTab}
+                  onChange={handleTabChange}
+                  variant="fullWidth"
+                  sx={{
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    '& .MuiTab-root': {
+                      minHeight: 72,
+                      textTransform: 'none',
+                      fontSize: '0.95rem',
+                      fontWeight: 'medium'
+                    }
+                  }}
+                >
+                  <Tab icon={<AgricultureIcon />} label="Farmer" iconPosition="start" />
+                  <Tab icon={<WavesIcon />} label="Fisherfolk" iconPosition="start" />
+                  <Tab icon={<EngineeringIcon />} label="Farmworker" iconPosition="start" />
+                  <Tab icon={<SchoolIcon />} label="Agri-Youth" iconPosition="start" />
+                </Tabs>
+
+                {/* Farmer Tab */}
+                <TabPanel value={currentTab} index={0}>
+                  <Box sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom color="primary">Farming Activities</Typography>
+                    <Divider sx={{ mb: 3 }} />
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle1" gutterBottom fontWeight="medium">Crop Production</Typography>
+                      </Grid>
+
+                      <Grid item xs={12} md={4}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.farmer?.is_rice || false}
+                              onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_rice', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Rice Production"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={4}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.farmer?.is_corn || false}
+                              onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_corn', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Corn Production"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={4}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.farmer?.is_other_crops || false}
+                              onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_other_crops', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Other Crops"
+                        />
+                      </Grid>
+
+                      {livelihoodDetails?.farmer?.is_other_crops && (
+                        <Grid item xs={12}>
+                          <TextField
+                            fullWidth
+                            label="Other Crops Description"
+                            multiline
+                            rows={2}
+                            value={livelihoodDetails?.farmer?.other_crops_description || ''}
+                            onChange={(e) => handleLivelihoodFieldChange('farmer', 'other_crops_description', e.target.value)}
+                            placeholder="Specify other crops you produce (e.g., vegetables, fruits, root crops)"
+                          />
+                        </Grid>
+                      )}
+
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle1" gutterBottom fontWeight="medium" sx={{ mt: 2 }}>Livestock and Poultry</Typography>
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.farmer?.is_livestock || false}
+                              onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_livestock', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Livestock Raising"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.farmer?.is_poultry || false}
+                              onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_poultry', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Poultry Raising"
+                        />
+                      </Grid>
+
+                      {livelihoodDetails?.farmer?.is_livestock && (
+                        <Grid item xs={12} md={6}>
+                          <TextField
+                            fullWidth
+                            label="Livestock Description"
+                            multiline
+                            rows={2}
+                            value={livelihoodDetails?.farmer?.livestock_description || ''}
+                            onChange={(e) => handleLivelihoodFieldChange('farmer', 'livestock_description', e.target.value)}
+                            placeholder="Specify livestock types (e.g., cattle, carabao, goats, swine)"
+                          />
+                        </Grid>
+                      )}
+
+                      {livelihoodDetails?.farmer?.is_poultry && (
+                        <Grid item xs={12} md={6}>
+                          <TextField
+                            fullWidth
+                            label="Poultry Description"
+                            multiline
+                            rows={2}
+                            value={livelihoodDetails?.farmer?.poultry_description || ''}
+                            onChange={(e) => handleLivelihoodFieldChange('farmer', 'poultry_description', e.target.value)}
+                            placeholder="Specify poultry types (e.g., chickens, ducks, geese, turkeys)"
+                          />
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Box>
+                </TabPanel>
+
+                {/* Fisherfolk Tab */}
+                <TabPanel value={currentTab} index={1}>
+                  <Box sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom color="primary">Fishing Activities</Typography>
+                    <Divider sx={{ mb: 3 }} />
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={4}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.fisherfolk?.is_fish_capture || false}
+                              onChange={(e) => handleLivelihoodFieldChange('fisherfolk', 'is_fish_capture', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Fish Capture"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={4}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.fisherfolk?.is_aquaculture || false}
+                              onChange={(e) => handleLivelihoodFieldChange('fisherfolk', 'is_aquaculture', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Aquaculture"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={4}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.fisherfolk?.is_fish_processing || false}
+                              onChange={(e) => handleLivelihoodFieldChange('fisherfolk', 'is_fish_processing', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Fish Processing"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Other Fishing Activities Description"
+                          multiline
+                          rows={3}
+                          value={livelihoodDetails?.fisherfolk?.other_fishing_description || ''}
+                          onChange={(e) => handleLivelihoodFieldChange('fisherfolk', 'other_fishing_description', e.target.value)}
+                          placeholder="Describe other fishing-related activities or specify details about your fishing operations"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </TabPanel>
+
+                {/* Farmworker Tab */}
+                <TabPanel value={currentTab} index={2}>
+                  <Box sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom color="primary">Farm Work Activities</Typography>
+                    <Divider sx={{ mb: 3 }} />
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={4}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.farmworker?.is_land_preparation || false}
+                              onChange={(e) => handleLivelihoodFieldChange('farmworker', 'is_land_preparation', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Land Preparation"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={4}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.farmworker?.is_cultivation || false}
+                              onChange={(e) => handleLivelihoodFieldChange('farmworker', 'is_cultivation', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Cultivation"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={4}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.farmworker?.is_harvesting || false}
+                              onChange={(e) => handleLivelihoodFieldChange('farmworker', 'is_harvesting', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Harvesting"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Other Work Description"
+                          multiline
+                          rows={3}
+                          value={livelihoodDetails?.farmworker?.other_work_description || ''}
+                          onChange={(e) => handleLivelihoodFieldChange('farmworker', 'other_work_description', e.target.value)}
+                          placeholder="Describe other farm work activities you perform (e.g., irrigation, pest control, farm maintenance)"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </TabPanel>
+
+                {/* Agri-Youth Tab */}
+                <TabPanel value={currentTab} index={3}>
+                  <Box sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom color="primary">Agricultural Youth Involvement</Typography>
+                    <Divider sx={{ mb: 3 }} />
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.agriYouth?.is_agri_youth || false}
+                              onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_agri_youth', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Agricultural Youth (15-30 years old)"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.agriYouth?.is_part_of_farming_household || false}
+                              onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_part_of_farming_household', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Part of Farming Household"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.agriYouth?.is_formal_agri_course || false}
+                              onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_formal_agri_course', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Formal Agricultural Course"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.agriYouth?.is_nonformal_agri_course || false}
+                              onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_nonformal_agri_course', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Non-formal Agricultural Course"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={livelihoodDetails?.agriYouth?.is_agri_program_participant || false}
+                              onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_agri_program_participant', e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Agricultural Program Participant"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Other Involvement Description"
+                          multiline
+                          rows={3}
+                          value={livelihoodDetails?.agriYouth?.other_involvement_description || ''}
+                          onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'other_involvement_description', e.target.value)}
+                          placeholder="Describe other agricultural involvement, programs participated in, or future plans in agriculture"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </TabPanel>
+              </CardContent>
+            </Card>
+          </Box>
         </Grid>
       </Grid>
     </Box>
