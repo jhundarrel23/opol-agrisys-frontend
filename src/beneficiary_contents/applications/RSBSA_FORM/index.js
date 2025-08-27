@@ -198,11 +198,12 @@ const RSBSAForm = () => {
             formData={formData.farmProfile}
             errors={errors}
             updateField={(field, value) => updateField('farmProfile', field, value)}
-            // Pass livelihood details data to the merged section
-            farmerDetails={formData.farmerDetails}
-            fisherfolkDetails={formData.fisherfolkDetails}
-            farmworkerDetails={formData.farmworkerDetails}
-            agriYouthDetails={formData.agriYouthDetails}
+            // Pass livelihood details data (mapped from formData.livelihoodDetails)
+            farmerDetails={formData.livelihoodDetails?.farmer}
+            fisherfolkDetails={formData.livelihoodDetails?.fisherfolk}
+            farmworkerDetails={formData.livelihoodDetails?.farmworker}
+            agriYouthDetails={formData.livelihoodDetails?.agriYouth}
+            updateLivelihoodDetails={updateLivelihoodDetails}
           />
         );
       case 3:

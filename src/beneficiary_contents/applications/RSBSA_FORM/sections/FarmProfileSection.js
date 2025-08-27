@@ -41,7 +41,8 @@ const FarmProfileSection = ({
   farmerDetails,
   fisherfolkDetails,
   farmworkerDetails,
-  agriYouthDetails
+  agriYouthDetails,
+  updateLivelihoodDetails
 }) => {
   const [livelihoodCategories, setLivelihoodCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -164,8 +165,9 @@ const FarmProfileSection = ({
     updateField(field, value);
   };
 
-  const handleLivelihoodFieldChange = (section, field, value) => {
-    updateField(section, field, value);
+  const handleLivelihoodFieldChange = (category, field, value) => {
+    // category should be one of: 'farmer', 'fisherfolk', 'farmworker', 'agriYouth'
+    updateLivelihoodDetails(category, field, value);
   };
 
   const handleTabChange = (event, newValue) => {
@@ -324,7 +326,7 @@ const FarmProfileSection = ({
                                 control={
                                   <Switch
                                     checked={farmerDetails?.is_rice || false}
-                                    onChange={(e) => handleLivelihoodFieldChange('farmerDetails', 'is_rice', e.target.checked)}
+                                    onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_rice', e.target.checked)}
                                     color="primary"
                                   />
                                 }
@@ -342,7 +344,7 @@ const FarmProfileSection = ({
                                 control={
                                   <Switch
                                     checked={farmerDetails?.is_corn || false}
-                                    onChange={(e) => handleLivelihoodFieldChange('farmerDetails', 'is_corn', e.target.checked)}
+                                    onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_corn', e.target.checked)}
                                     color="primary"
                                   />
                                 }
@@ -360,7 +362,7 @@ const FarmProfileSection = ({
                                 control={
                                   <Switch
                                     checked={farmerDetails?.is_other_crops || false}
-                                    onChange={(e) => handleLivelihoodFieldChange('farmerDetails', 'is_other_crops', e.target.checked)}
+                                    onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_other_crops', e.target.checked)}
                                     color="primary"
                                   />
                                 }
@@ -381,7 +383,7 @@ const FarmProfileSection = ({
                                   multiline
                                   rows={2}
                                   value={farmerDetails.other_crops_description || ''}
-                                  onChange={(e) => handleLivelihoodFieldChange('farmerDetails', 'other_crops_description', e.target.value)}
+                                  onChange={(e) => handleLivelihoodFieldChange('farmer', 'other_crops_description', e.target.value)}
                                   placeholder="Specify other crops you produce (e.g., vegetables, fruits, root crops)"
                                   sx={{ mt: 2 }}
                                 />
@@ -405,7 +407,7 @@ const FarmProfileSection = ({
                                 control={
                                   <Switch
                                     checked={farmerDetails?.is_livestock || false}
-                                    onChange={(e) => handleLivelihoodFieldChange('farmerDetails', 'is_livestock', e.target.checked)}
+                                    onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_livestock', e.target.checked)}
                                     color="primary"
                                   />
                                 }
@@ -423,7 +425,7 @@ const FarmProfileSection = ({
                                 control={
                                   <Switch
                                     checked={farmerDetails?.is_poultry || false}
-                                    onChange={(e) => handleLivelihoodFieldChange('farmerDetails', 'is_poultry', e.target.checked)}
+                                    onChange={(e) => handleLivelihoodFieldChange('farmer', 'is_poultry', e.target.checked)}
                                     color="primary"
                                   />
                                 }
@@ -444,7 +446,7 @@ const FarmProfileSection = ({
                                   multiline
                                   rows={2}
                                   value={farmerDetails.livestock_description || ''}
-                                  onChange={(e) => handleLivelihoodFieldChange('farmerDetails', 'livestock_description', e.target.value)}
+                                  onChange={(e) => handleLivelihoodFieldChange('farmer', 'livestock_description', e.target.value)}
                                   placeholder="Specify livestock types and numbers"
                                   sx={{ mt: 2 }}
                                 />
@@ -459,7 +461,7 @@ const FarmProfileSection = ({
                                   multiline
                                   rows={2}
                                   value={farmerDetails.poultry_description || ''}
-                                  onChange={(e) => handleLivelihoodFieldChange('farmerDetails', 'poultry_description', e.target.value)}
+                                  onChange={(e) => handleLivelihoodFieldChange('farmer', 'poultry_description', e.target.value)}
                                   placeholder="Specify poultry types and numbers"
                                   sx={{ mt: 2 }}
                                 />
@@ -482,7 +484,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={fisherfolkDetails?.is_fish_capture || false}
-                            onChange={(e) => handleLivelihoodFieldChange('fisherfolkDetails', 'is_fish_capture', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('fisherfolk', 'is_fish_capture', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -500,7 +502,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={fisherfolkDetails?.is_aquaculture || false}
-                            onChange={(e) => handleLivelihoodFieldChange('fisherfolkDetails', 'is_aquaculture', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('fisherfolk', 'is_aquaculture', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -518,7 +520,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={fisherfolkDetails?.is_fish_processing || false}
-                            onChange={(e) => handleLivelihoodFieldChange('fisherfolkDetails', 'is_fish_processing', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('fisherfolk', 'is_fish_processing', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -538,7 +540,7 @@ const FarmProfileSection = ({
                         multiline
                         rows={3}
                         value={fisherfolkDetails?.other_fishing_description || ''}
-                        onChange={(e) => handleLivelihoodFieldChange('fisherfolkDetails', 'other_fishing_description', e.target.value)}
+                        onChange={(e) => handleLivelihoodFieldChange('fisherfolk', 'other_fishing_description', e.target.value)}
                         placeholder="Describe other fishing-related activities or specify details about your fishing operations"
                       />
                     </Grid>
@@ -555,7 +557,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={farmworkerDetails?.is_land_preparation || false}
-                            onChange={(e) => handleLivelihoodFieldChange('farmworkerDetails', 'is_land_preparation', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('farmworker', 'is_land_preparation', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -573,7 +575,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={farmworkerDetails?.is_cultivation || false}
-                            onChange={(e) => handleLivelihoodFieldChange('farmworkerDetails', 'is_cultivation', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('farmworker', 'is_cultivation', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -591,7 +593,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={farmworkerDetails?.is_harvesting || false}
-                            onChange={(e) => handleLivelihoodFieldChange('farmworkerDetails', 'is_harvesting', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('farmworker', 'is_harvesting', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -611,7 +613,7 @@ const FarmProfileSection = ({
                         multiline
                         rows={3}
                         value={farmworkerDetails?.other_work_description || ''}
-                        onChange={(e) => handleLivelihoodFieldChange('farmworkerDetails', 'other_work_description', e.target.value)}
+                        onChange={(e) => handleLivelihoodFieldChange('farmworker', 'other_work_description', e.target.value)}
                         placeholder="Describe other farm work activities (e.g., irrigation, pest control, farm maintenance)"
                       />
                     </Grid>
@@ -628,7 +630,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={agriYouthDetails?.is_agri_youth || false}
-                            onChange={(e) => handleLivelihoodFieldChange('agriYouthDetails', 'is_agri_youth', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_agri_youth', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -646,7 +648,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={agriYouthDetails?.is_part_of_farming_household || false}
-                            onChange={(e) => handleLivelihoodFieldChange('agriYouthDetails', 'is_part_of_farming_household', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_part_of_farming_household', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -664,7 +666,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={agriYouthDetails?.is_formal_agri_course || false}
-                            onChange={(e) => handleLivelihoodFieldChange('agriYouthDetails', 'is_formal_agri_course', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_formal_agri_course', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -682,7 +684,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={agriYouthDetails?.is_nonformal_agri_course || false}
-                            onChange={(e) => handleLivelihoodFieldChange('agriYouthDetails', 'is_nonformal_agri_course', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_nonformal_agri_course', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -700,7 +702,7 @@ const FarmProfileSection = ({
                         control={
                           <Switch
                             checked={agriYouthDetails?.is_agri_program_participant || false}
-                            onChange={(e) => handleLivelihoodFieldChange('agriYouthDetails', 'is_agri_program_participant', e.target.checked)}
+                            onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'is_agri_program_participant', e.target.checked)}
                             color="primary"
                           />
                         }
@@ -720,7 +722,7 @@ const FarmProfileSection = ({
                         multiline
                         rows={3}
                         value={agriYouthDetails?.other_involvement_description || ''}
-                        onChange={(e) => handleLivelihoodFieldChange('agriYouthDetails', 'other_involvement_description', e.target.value)}
+                        onChange={(e) => handleLivelihoodFieldChange('agriYouth', 'other_involvement_description', e.target.value)}
                         placeholder="Describe other agricultural involvement, programs, or future plans in agriculture"
                       />
                     </Grid>
