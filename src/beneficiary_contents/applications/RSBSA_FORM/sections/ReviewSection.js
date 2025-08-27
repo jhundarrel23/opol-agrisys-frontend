@@ -291,19 +291,19 @@ const ReviewSection = ({ formData, errors, onEdit }) => {
                   </Typography>
                   <List dense>
                     <ListItem>
-                      <ListItemText primary={`Rice Production: ${formatBoolean(formData.livelihoodDetails?.farmer?.is_rice)}`} />
+                      <ListItemText primary={`Rice Production: ${formatBoolean(formData.farmerDetails.is_rice)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Corn Production: ${formatBoolean(formData.livelihoodDetails?.farmer?.is_corn)}`} />
+                      <ListItemText primary={`Corn Production: ${formatBoolean(formData.farmerDetails.is_corn)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Other Crops: ${formatBoolean(formData.livelihoodDetails?.farmer?.is_other_crops)}`} />
+                      <ListItemText primary={`Other Crops: ${formatBoolean(formData.farmerDetails.is_other_crops)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Livestock: ${formatBoolean(formData.livelihoodDetails?.farmer?.is_livestock)}`} />
+                      <ListItemText primary={`Livestock: ${formatBoolean(formData.farmerDetails.is_livestock)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Poultry: ${formatBoolean(formData.livelihoodDetails?.farmer?.is_poultry)}`} />
+                      <ListItemText primary={`Poultry: ${formatBoolean(formData.farmerDetails.is_poultry)}`} />
                     </ListItem>
                   </List>
                 </Grid>
@@ -315,13 +315,13 @@ const ReviewSection = ({ formData, errors, onEdit }) => {
                   </Typography>
                   <List dense>
                     <ListItem>
-                      <ListItemText primary={`Fish Capture: ${formatBoolean(formData.livelihoodDetails?.fisherfolk?.is_fish_capture)}`} />
+                      <ListItemText primary={`Fish Capture: ${formatBoolean(formData.fisherfolkDetails.is_fish_capture)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Aquaculture: ${formatBoolean(formData.livelihoodDetails?.fisherfolk?.is_aquaculture)}`} />
+                      <ListItemText primary={`Aquaculture: ${formatBoolean(formData.fisherfolkDetails.is_aquaculture)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Fish Processing: ${formatBoolean(formData.livelihoodDetails?.fisherfolk?.is_fish_processing)}`} />
+                      <ListItemText primary={`Fish Processing: ${formatBoolean(formData.fisherfolkDetails.is_fish_processing)}`} />
                     </ListItem>
                   </List>
                 </Grid>
@@ -333,13 +333,13 @@ const ReviewSection = ({ formData, errors, onEdit }) => {
                   </Typography>
                   <List dense>
                     <ListItem>
-                      <ListItemText primary={`Land Preparation: ${formatBoolean(formData.livelihoodDetails?.farmworker?.is_land_preparation)}`} />
+                      <ListItemText primary={`Land Preparation: ${formatBoolean(formData.farmworkerDetails.is_land_preparation)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Cultivation: ${formatBoolean(formData.livelihoodDetails?.farmworker?.is_cultivation)}`} />
+                      <ListItemText primary={`Cultivation: ${formatBoolean(formData.farmworkerDetails.is_cultivation)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Harvesting: ${formatBoolean(formData.livelihoodDetails?.farmworker?.is_harvesting)}`} />
+                      <ListItemText primary={`Harvesting: ${formatBoolean(formData.farmworkerDetails.is_harvesting)}`} />
                     </ListItem>
                   </List>
                 </Grid>
@@ -351,13 +351,13 @@ const ReviewSection = ({ formData, errors, onEdit }) => {
                   </Typography>
                   <List dense>
                     <ListItem>
-                      <ListItemText primary={`Agri-Youth: ${formatBoolean(formData.livelihoodDetails?.agriYouth?.is_agri_youth)}`} />
+                      <ListItemText primary={`Agri-Youth: ${formatBoolean(formData.agriYouthDetails.is_agri_youth)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Farming Household: ${formatBoolean(formData.livelihoodDetails?.agriYouth?.is_part_of_farming_household)}`} />
+                      <ListItemText primary={`Farming Household: ${formatBoolean(formData.agriYouthDetails.is_part_of_farming_household)}`} />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`Formal Course: ${formatBoolean(formData.livelihoodDetails?.agriYouth?.is_formal_agri_course)}`} />
+                      <ListItemText primary={`Formal Course: ${formatBoolean(formData.agriYouthDetails.is_formal_agri_course)}`} />
                     </ListItem>
                   </List>
                 </Grid>

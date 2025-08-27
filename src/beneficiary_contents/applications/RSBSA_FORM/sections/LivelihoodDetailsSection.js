@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Grid,
   TextField,
+
   Typography,
   Box,
   Card,
@@ -22,8 +23,12 @@ import {
 } from '@mui/icons-material';
 
 const LivelihoodDetailsSection = ({
-  livelihoodDetails,
-  updateLivelihoodDetails
+  farmerDetails,
+  fisherfolkDetails,
+  farmworkerDetails,
+  agriYouthDetails,
+
+  updateField
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
 
@@ -31,8 +36,8 @@ const LivelihoodDetailsSection = ({
     setCurrentTab(newValue);
   };
 
-  const handleFieldChange = (category, field, value) => {
-    updateLivelihoodDetails(category, field, value);
+  const handleFieldChange = (section, field, value) => {
+    updateField(section, field, value);
   };
 
   const TabPanel = ({ children, value, index }) => (
@@ -64,15 +69,7 @@ const LivelihoodDetailsSection = ({
       </Alert>
 
       {/* Main Card with Tabs */}
-      <Card
-        variant="outlined"
-        sx={{
-          borderRadius: 2,
-          width: "100%",
-          maxWidth: "100%",
-          overflow: "hidden"
-        }}
-      >
+      <Card variant="outlined" sx={{ borderRadius: 2 }}>
         <CardContent sx={{ p: 0 }}>
           <Tabs
             value={currentTab}
@@ -80,44 +77,36 @@ const LivelihoodDetailsSection = ({
             variant="fullWidth"
             sx={{
               borderBottom: 1,
-              borderColor: "divider",
-              minHeight: 70,
-              "& .MuiTab-root": {
-                minHeight: 70,
-                textTransform: "none",
-                fontSize: "0.95rem",
-                fontWeight: 500,
-                color: "text.secondary",
-                padding: "12px 8px",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  backgroundColor: "action.hover",
-                  color: "primary.main"
-                },
-                "& .MuiSvgIcon-root": {
-                  fontSize: "1.2rem",
-                  marginRight: "6px"
-                }
-              },
-              "& .MuiTab-root.Mui-selected": {
-                color: "white !important",
-                fontWeight: "bold",
-                backgroundColor: "primary.main",
-                borderRadius: "8px 8px 0 0",
-                "&:hover": {
-                  backgroundColor: "primary.dark"
-                }
-              },
-              "& .MuiTabs-indicator": {
-                display: "none"
+              borderColor: 'divider',
+              '& .MuiTab-root': {
+                minHeight: 72,
+                textTransform: 'none',
+                fontSize: '0.95rem',
+                fontWeight: 'medium'
               }
             }}
-                      >
-              <Tab icon={<AgricultureIcon />} label="Farmer" iconPosition="start" />
-              <Tab icon={<WavesIcon />} label="Fisherfolk" iconPosition="start" />
-              <Tab icon={<EngineeringIcon />} label="Farmworker" iconPosition="start" />
-              <Tab icon={<SchoolIcon />} label="Agri-Youth" iconPosition="start" />
-            </Tabs>
+          >
+            <Tab
+              icon={<AgricultureIcon />}
+              label="Farmer Details"
+              iconPosition="start"
+            />
+            <Tab
+              icon={<WavesIcon />}
+              label="Fisherfolk Details"
+              iconPosition="start"
+            />
+            <Tab
+              icon={<EngineeringIcon />}
+              label="Farmworker Details"
+              iconPosition="start"
+            />
+            <Tab
+              icon={<SchoolIcon />}
+              label="Agri-Youth Details"
+              iconPosition="start"
+            />
+          </Tabs>
 
           {/* Farmer Details Tab */}
           <TabPanel value={currentTab} index={0}>
@@ -127,7 +116,7 @@ const LivelihoodDetailsSection = ({
               </Typography>
               <Divider sx={{ mb: 3 }} />
 
-              <Grid container spacing={2} alignItems="center">
+              <Grid container spacing={3}>
                 {/* Crop Production */}
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" gutterBottom fontWeight="medium">
@@ -139,8 +128,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.farmer?.is_rice || false}
-                        onChange={(e) => handleFieldChange('farmer', 'is_rice', e.target.checked)}
+                        checked={farmerDetails.is_rice || false}
+                        onChange={(e) => handleFieldChange('farmerDetails', 'is_rice', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -152,8 +141,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.farmer?.is_corn || false}
-                        onChange={(e) => handleFieldChange('farmer', 'is_corn', e.target.checked)}
+                        checked={farmerDetails.is_corn || false}
+                        onChange={(e) => handleFieldChange('farmerDetails', 'is_corn', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -165,8 +154,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.farmer?.is_other_crops || false}
-                        onChange={(e) => handleFieldChange('farmer', 'is_other_crops', e.target.checked)}
+                        checked={farmerDetails.is_other_crops || false}
+                        onChange={(e) => handleFieldChange('farmerDetails', 'is_other_crops', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -174,15 +163,15 @@ const LivelihoodDetailsSection = ({
                   />
                 </Grid>
 
-                {livelihoodDetails.farmer?.is_other_crops && (
+                {farmerDetails.is_other_crops && (
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
                       label="Other Crops Description"
                       multiline
                       rows={2}
-                      value={livelihoodDetails.farmer?.other_crops_description || ''}
-                      onChange={(e) => handleFieldChange('farmer', 'other_crops_description', e.target.value)}
+                      value={farmerDetails.other_crops_description || ''}
+                      onChange={(e) => handleFieldChange('farmerDetails', 'other_crops_description', e.target.value)}
                       placeholder="Specify other crops you produce (e.g., vegetables, fruits, root crops)"
                     />
                   </Grid>
@@ -199,8 +188,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.farmer?.is_livestock || false}
-                        onChange={(e) => handleFieldChange('farmer', 'is_livestock', e.target.checked)}
+                        checked={farmerDetails.is_livestock || false}
+                        onChange={(e) => handleFieldChange('farmerDetails', 'is_livestock', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -212,8 +201,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.farmer?.is_poultry || false}
-                        onChange={(e) => handleFieldChange('farmer', 'is_poultry', e.target.checked)}
+                        checked={farmerDetails.is_poultry || false}
+                        onChange={(e) => handleFieldChange('farmerDetails', 'is_poultry', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -221,29 +210,29 @@ const LivelihoodDetailsSection = ({
                   />
                 </Grid>
 
-                {livelihoodDetails.farmer?.is_livestock && (
+                {farmerDetails.is_livestock && (
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       label="Livestock Description"
                       multiline
                       rows={2}
-                      value={livelihoodDetails.farmer?.livestock_description || ''}
-                      onChange={(e) => handleFieldChange('farmer', 'livestock_description', e.target.value)}
+                      value={farmerDetails.livestock_description || ''}
+                      onChange={(e) => handleFieldChange('farmerDetails', 'livestock_description', e.target.value)}
                       placeholder="Specify livestock types (e.g., cattle, carabao, goats, swine)"
                     />
                   </Grid>
                 )}
 
-                {livelihoodDetails.farmer?.is_poultry && (
+                {farmerDetails.is_poultry && (
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       label="Poultry Description"
                       multiline
                       rows={2}
-                      value={livelihoodDetails.farmer?.poultry_description || ''}
-                      onChange={(e) => handleFieldChange('farmer', 'poultry_description', e.target.value)}
+                      value={farmerDetails.poultry_description || ''}
+                      onChange={(e) => handleFieldChange('farmerDetails', 'poultry_description', e.target.value)}
                       placeholder="Specify poultry types (e.g., chickens, ducks, geese, turkeys)"
                     />
                   </Grid>
@@ -260,13 +249,13 @@ const LivelihoodDetailsSection = ({
               </Typography>
               <Divider sx={{ mb: 3 }} />
 
-              <Grid container spacing={2} alignItems="center">
+              <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.fisherfolk?.is_fish_capture || false}
-                        onChange={(e) => handleFieldChange('fisherfolk', 'is_fish_capture', e.target.checked)}
+                        checked={fisherfolkDetails.is_fish_capture || false}
+                        onChange={(e) => handleFieldChange('fisherfolkDetails', 'is_fish_capture', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -278,8 +267,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.fisherfolk?.is_aquaculture || false}
-                        onChange={(e) => handleFieldChange('fisherfolk', 'is_aquaculture', e.target.checked)}
+                        checked={fisherfolkDetails.is_aquaculture || false}
+                        onChange={(e) => handleFieldChange('fisherfolkDetails', 'is_aquaculture', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -291,8 +280,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.fisherfolk?.is_fish_processing || false}
-                        onChange={(e) => handleFieldChange('fisherfolk', 'is_fish_processing', e.target.checked)}
+                        checked={fisherfolkDetails.is_fish_processing || false}
+                        onChange={(e) => handleFieldChange('fisherfolkDetails', 'is_fish_processing', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -306,8 +295,8 @@ const LivelihoodDetailsSection = ({
                     label="Other Fishing Activities Description"
                     multiline
                     rows={3}
-                    value={livelihoodDetails.fisherfolk?.other_fishing_description || ''}
-                    onChange={(e) => handleFieldChange('fisherfolk', 'other_fishing_description', e.target.value)}
+                    value={fisherfolkDetails.other_fishing_description || ''}
+                    onChange={(e) => handleFieldChange('fisherfolkDetails', 'other_fishing_description', e.target.value)}
                     placeholder="Describe other fishing-related activities or specify details about your fishing operations"
                   />
                 </Grid>
@@ -323,13 +312,13 @@ const LivelihoodDetailsSection = ({
               </Typography>
               <Divider sx={{ mb: 3 }} />
 
-              <Grid container spacing={2} alignItems="center">
+              <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.farmworker?.is_land_preparation || false}
-                        onChange={(e) => handleFieldChange('farmworker', 'is_land_preparation', e.target.checked)}
+                        checked={farmworkerDetails.is_land_preparation || false}
+                        onChange={(e) => handleFieldChange('farmworkerDetails', 'is_land_preparation', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -341,8 +330,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.farmworker?.is_cultivation || false}
-                        onChange={(e) => handleFieldChange('farmworker', 'is_cultivation', e.target.checked)}
+                        checked={farmworkerDetails.is_cultivation || false}
+                        onChange={(e) => handleFieldChange('farmworkerDetails', 'is_cultivation', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -354,8 +343,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.farmworker?.is_harvesting || false}
-                        onChange={(e) => handleFieldChange('farmworker', 'is_harvesting', e.target.checked)}
+                        checked={farmworkerDetails.is_harvesting || false}
+                        onChange={(e) => handleFieldChange('farmworkerDetails', 'is_harvesting', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -369,8 +358,8 @@ const LivelihoodDetailsSection = ({
                     label="Other Work Description"
                     multiline
                     rows={3}
-                    value={livelihoodDetails.farmworker?.other_work_description || ''}
-                    onChange={(e) => handleFieldChange('farmworker', 'other_work_description', e.target.value)}
+                    value={farmworkerDetails.other_work_description || ''}
+                    onChange={(e) => handleFieldChange('farmworkerDetails', 'other_work_description', e.target.value)}
                     placeholder="Describe other farm work activities you perform (e.g., irrigation, pest control, farm maintenance)"
                   />
                 </Grid>
@@ -386,13 +375,13 @@ const LivelihoodDetailsSection = ({
               </Typography>
               <Divider sx={{ mb: 3 }} />
 
-              <Grid container spacing={2} alignItems="center">
+              <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.agriYouth?.is_agri_youth || false}
-                        onChange={(e) => handleFieldChange('agriYouth', 'is_agri_youth', e.target.checked)}
+                        checked={agriYouthDetails.is_agri_youth || false}
+                        onChange={(e) => handleFieldChange('agriYouthDetails', 'is_agri_youth', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -404,8 +393,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.agriYouth?.is_part_of_farming_household || false}
-                        onChange={(e) => handleFieldChange('agriYouth', 'is_part_of_farming_household', e.target.checked)}
+                        checked={agriYouthDetails.is_part_of_farming_household || false}
+                        onChange={(e) => handleFieldChange('agriYouthDetails', 'is_part_of_farming_household', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -417,8 +406,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.agriYouth?.is_formal_agri_course || false}
-                        onChange={(e) => handleFieldChange('agriYouth', 'is_formal_agri_course', e.target.checked)}
+                        checked={agriYouthDetails.is_formal_agri_course || false}
+                        onChange={(e) => handleFieldChange('agriYouthDetails', 'is_formal_agri_course', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -430,8 +419,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.agriYouth?.is_nonformal_agri_course || false}
-                        onChange={(e) => handleFieldChange('agriYouth', 'is_nonformal_agri_course', e.target.checked)}
+                        checked={agriYouthDetails.is_nonformal_agri_course || false}
+                        onChange={(e) => handleFieldChange('agriYouthDetails', 'is_nonformal_agri_course', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -443,8 +432,8 @@ const LivelihoodDetailsSection = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={livelihoodDetails.agriYouth?.is_agri_program_participant || false}
-                        onChange={(e) => handleFieldChange('agriYouth', 'is_agri_program_participant', e.target.checked)}
+                        checked={agriYouthDetails.is_agri_program_participant || false}
+                        onChange={(e) => handleFieldChange('agriYouthDetails', 'is_agri_program_participant', e.target.checked)}
                         color="primary"
                       />
                     }
@@ -458,8 +447,8 @@ const LivelihoodDetailsSection = ({
                     label="Other Involvement Description"
                     multiline
                     rows={3}
-                    value={livelihoodDetails.agriYouth?.other_involvement_description || ''}
-                    onChange={(e) => handleFieldChange('agriYouth', 'other_involvement_description', e.target.value)}
+                    value={agriYouthDetails.other_involvement_description || ''}
+                    onChange={(e) => handleFieldChange('agriYouthDetails', 'other_involvement_description', e.target.value)}
                     placeholder="Describe other agricultural involvement, programs participated in, or future plans in agriculture"
                   />
                 </Grid>

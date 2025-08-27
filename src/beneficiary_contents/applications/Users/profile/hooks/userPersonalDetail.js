@@ -1,3 +1,4 @@
+/* eslint-disable no-else-return */
 import { useState, useCallback, useEffect } from 'react';
 import axiosInstance from 'src/api/axiosInstance';
 

@@ -16,6 +16,7 @@ import {
   Fade,
   Paper,
   Chip,
+
   Tooltip
 } from '@mui/material';
 import {
@@ -100,131 +101,24 @@ const RSBSAForm = () => {
   const {
     formData,
     errors,
-    setErrors,
-    isLoading,
+
     isSubmitting,
     currentStep,
     totalSteps,
-    nextStep,
-    prevStep,
-    goToStep,
-    submitForm,
-    saveDraft,
-    resetForm,
     updateField,
     addFarmParcel,
     updateFarmParcel,
     removeFarmParcel,
-    updateLivelihoodDetails
+
+    nextStep,
+    prevStep,
+    goToStep,
+    submitForm,
+    resetForm,
+    formProgress,
+
+    canSubmit
   } = useRSBSAForm();
-
-  // Calculate form completion percentage
-  const calculateProgress = () => {
-    let completedFields = 0;
-    let totalFields = 0;
-    
-    // Count completed fields in beneficiary profile
-    Object.keys(formData.beneficiaryProfile).forEach(key => {
-      if (formData.beneficiaryProfile[key] !== null && 
-          formData.beneficiaryProfile[key] !== '' && 
-          formData.beneficiaryProfile[key] !== false) {
-        completedFields++;
-      }
-      totalFields++;
-    });
-    
-    // Count completed fields in farm profile
-    if (formData.farmProfile.livelihood_category_id) completedFields++;
-    totalFields++;
-    
-    // Count completed farm parcels
-    if (formData.farmParcels.length > 0) completedFields++;
-    totalFields++;
-    
-    return Math.round((completedFields / totalFields) * 100);
-  };
-
-  // Check if current step has errors
-  const hasStepErrors = () => {
-    return Object.keys(errors).some(key => {
-      if (key.includes('.')) {
-        const [section] = key.split('.');
-        return section === getCurrentStepSection();
-      }
-      return false;
-    });
-  };
-
-  // Get current step section name
-  const getCurrentStepSection = () => {
-    switch (currentStep) {
-      case 1: return 'beneficiaryProfile';
-      case 2: return 'farmProfile';
-      case 3: return 'farmParcels';
-      case 4: return 'livelihoodDetails';
-      default: return '';
-    }
-  };
-
-  // Get step title for display
-  const getStepTitle = (step) => {
-    switch (step) {
-      case 1: return 'Personal Information';
-      case 2: return 'Farm Profile';
-      case 3: return 'Farm Parcels';
-      case 4: return 'Livelihood Details';
-      case 5: return 'Review & Submit';
-      case 6: return 'Submission Complete';
-      default: return 'Unknown Step';
-    }
-  };
-
-  // Handle form submission with enhanced error handling
-  const handleSubmit = async () => {
-    try {
-      // Use canSubmit for validation before submission
-      if (!canSubmit()) {
-        setShowError(true);
-        setErrorMessage('Please complete all required fields before submitting.');
-        return;
-      }
-
-      const success = await submitForm();
-      if (success) {
-        setShowSuccess(true);
-        setShowError(false);
-      } else {
-        setShowError(true);
-        setErrorMessage('Form submission failed. Please check your inputs and try again.');
-      }
-    } catch (error) {
-      console.error('Submission error:', error);
-      setShowError(true);
-      setErrorMessage('An unexpected error occurred. Please try again.');
-    }
-  };
-
-  // Check if form can be submitted
-  const canSubmit = () => {
-    return Object.keys(errors).length === 0 && 
-           formData.farmParcels.length > 0 && 
-           formData.farmProfile.livelihood_category_id;
-  };
-
-  // Handle next step with validation
-  const handleNextStep = () => {
-    if (hasStepErrors()) {
-      // Show error message
-      console.log('Current step has validation errors. Please fix them before proceeding.');
-      return;
-    }
-    nextStep();
-  };
-
-  // Handle previous step
-  const handlePrevStep = () => {
-    prevStep();
-  };
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -264,6 +158,19 @@ const RSBSAForm = () => {
     }
   ];
 
+  // Handle form submission
+  const handleSubmit = async () => {
+    const success = await submitForm();
+    if (success) {
+      setShowSuccess(true);
+      setShowError(false);
+    } else {
+      setShowError(true);
+      setErrorMessage('Failed to submit form. Please try again.');
+      setShowSuccess(false);
+    }
+  };
+
   // Handle form reset
   const handleReset = () => {
     // eslint-disable-next-line no-alert
@@ -275,16 +182,10 @@ const RSBSAForm = () => {
   };
 
   // Save draft
-  const handleSaveDraft = async () => {
-    try {
-      await saveDraft();
-      // eslint-disable-next-line no-alert
-      alert('Draft saved successfully!');
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      // eslint-disable-next-line no-alert
-      alert('Failed to save draft. Please try again.');
-    }
+  const handleSaveDraft = () => {
+    // Data is automatically saved to localStorage via the hook
+    // eslint-disable-next-line no-alert
+    alert('Draft saved successfully!');
   };
 
   // Render current step content
@@ -319,8 +220,12 @@ const RSBSAForm = () => {
       case 4:
         return (
           <LivelihoodDetailsSection
-            livelihoodDetails={formData.livelihoodDetails}
-            updateLivelihoodDetails={updateLivelihoodDetails}
+            farmerDetails={formData.farmerDetails}
+            fisherfolkDetails={formData.fisherfolkDetails}
+            farmworkerDetails={formData.farmworkerDetails}
+            agriYouthDetails={formData.agriYouthDetails}
+            errors={errors}
+            updateField={updateField}
           />
         );
       case 5:
@@ -337,7 +242,7 @@ const RSBSAForm = () => {
             formData={formData}
             isSubmitting={isSubmitting}
             onSubmit={handleSubmit}
-            canSubmit={canSubmit()}
+            canSubmit={canSubmit}
           />
         );
       default:
@@ -379,64 +284,34 @@ const RSBSAForm = () => {
           </Typography>
         </Paper>
 
-        {/* Progress Container */}
+        {/* Progress Indicator */}
         <ProgressContainer>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={8}>
-              <Typography variant="h6" gutterBottom>
-                Form Progress: {calculateProgress()}% Complete
-              </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={calculateProgress()} 
-                sx={{ height: 8, borderRadius: 4 }}
-              />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Step {currentStep} of {totalSteps}: {getStepTitle(currentStep)}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={4} textAlign="right">
-              <Button
-                variant="outlined"
-                startIcon={<SaveIcon />}
-                onClick={saveDraft}
-                disabled={isSubmitting}
-                size="small"
-              >
-                Save Draft
-              </Button>
-            </Grid>
-          </Grid>
-          
-          {/* Error Display */}
-          {Object.keys(errors).length > 0 && (
-            <Alert 
-              severity="error" 
-              sx={{ mt: 2, borderRadius: 2 }}
-              action={
-                <Button 
-                  color="inherit" 
-                  size="small" 
-                  onClick={() => setErrors({})}
-                >
-                  Clear
-                </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="h6" color="primary" fontWeight="bold">
+              Form Progress
+            </Typography>
+            <Chip 
+              label={`${formProgress}% Complete`}
+              color="primary"
+              variant="outlined"
+              sx={{ fontWeight: 'bold' }}
+            />
+          </Box>
+          <LinearProgress 
+            variant="determinate" 
+            value={formProgress} 
+            sx={{ 
+              height: 8, 
+              borderRadius: 4,
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+              '& .MuiLinearProgress-bar': {
+                borderRadius: 4
               }
-            >
-              <Typography variant="body2" fontWeight="bold">
-                Please fix the following errors before proceeding:
-              </Typography>
-              <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2 }}>
-                {Object.entries(errors).map(([field, message]) => (
-                  <li key={field}>
-                    <Typography variant="body2">
-                      <strong>{field.includes('.') ? field.split('.')[1] : field}:</strong> {message}
-                    </Typography>
-                  </li>
-                ))}
-              </Box>
-            </Alert>
-          )}
+            }} 
+          />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Step {currentStep} of {totalSteps}: {steps[currentStep - 1]?.description}
+          </Typography>
         </ProgressContainer>
 
         {/* Success/Error Messages */}
@@ -485,45 +360,52 @@ const RSBSAForm = () => {
 
             {/* Form Content */}
             <Box sx={{ mt: 4 }}>
-              {isLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-                  <Typography variant="h6" color="text.secondary">
-                    Loading form data...
-                  </Typography>
-                </Box>
-              ) : (
-                renderStepContent()
-              )}
+              {renderStepContent()}
             </Box>
 
             {/* Action Buttons */}
             <ActionButtonContainer>
-              <Button
-                variant="outlined"
-                startIcon={<ArrowBackIcon />}
-                onClick={handlePrevStep}
-                disabled={currentStep === 1 || isSubmitting}
-              >
-                Previous
-              </Button>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Tooltip title="Save current progress">
+                  <Button
+                    variant="outlined"
+                    startIcon={<SaveIcon />}
+                    onClick={handleSaveDraft}
+                    disabled={isSubmitting}
+                  >
+                    Save Draft
+                  </Button>
+                </Tooltip>
 
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                {/* Show validation status */}
-                {hasStepErrors() && (
-                  <Chip 
-                    label="Fix errors to continue" 
-                    color="error" 
-                    size="small"
-                    icon={<Alert severity="error" />}
-                  />
-                )}
-                
+                <Tooltip title="Reset all form data">
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<RefreshIcon />}
+                    onClick={handleReset}
+                    disabled={isSubmitting}
+                  >
+                    Reset Form
+                  </Button>
+                </Tooltip>
+              </Box>
+
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<ArrowBackIcon />}
+                  onClick={prevStep}
+                  disabled={currentStep === 1 || isSubmitting}
+                >
+                  Previous
+                </Button>
+
                 {currentStep < totalSteps ? (
                   <Button
                     variant="contained"
                     endIcon={<ArrowForwardIcon />}
-                    onClick={handleNextStep}
-                    disabled={isSubmitting || hasStepErrors()}
+                    onClick={nextStep}
+                    disabled={isSubmitting}
                     sx={{ minWidth: 120 }}
                   >
                     Next
@@ -533,8 +415,8 @@ const RSBSAForm = () => {
                     variant="contained"
                     color="success"
                     endIcon={<SendIcon />}
-                    onClick={submitForm}
-                    disabled={isSubmitting || hasStepErrors()}
+                    onClick={handleSubmit}
+                    disabled={!canSubmit || isSubmitting}
                     sx={{ minWidth: 120 }}
                   >
                     {isSubmitting ? 'Submitting...' : 'Submit Application'}
